@@ -1,25 +1,66 @@
-#ifndef LOGGER
-#define LOGGER
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file logger.h
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-10
+
+#ifndef LOGGER_H
+#define LOGGER_H
+
 #include <iostream>
 #include <sstream>
-namespace lightswing {
 
-class SimpleDebugPrinter {
+namespace lightswing
+{
+
+class simple_debug_printer
+{
 public:
-    SimpleDebugPrinter() :ss_() { }
-    ~SimpleDebugPrinter() { std::cout<<ss_.str()<<std::endl; }
-    std::stringstream& stream() {return ss_;}
+	simple_debug_printer() :
+		ss_()
+	{
+	}
+
+	~simple_debug_printer()
+	{
+		std::cout << ss_.str() << std::endl;
+	}
+
+	std::stringstream& stream()
+	{
+		return ss_;
+	}
+
 private:
-      std::stringstream ss_;
+	std::stringstream ss_;
 };
 
-#define LOG_DEBUG SimpleDebugPrinter().stream()<<"[LOG_DEBUG]"  \
-                                    <<__FILE__ <<" @ "<<  __func__ << "(" <<  __LINE__ <<")"
+#define LOG_DEBUG simple_debug_printer().stream() << "[LOG_DEBUG]"  \
+                                                  << __FILE__       \
+                                                  << " @ "          \
+                                                  << __func__       \
+                                                  << "("            \
+                                                  << __LINE__       \
+                                                  << ")"
 
-#define LOG_INFO SimpleDebugPrinter().stream()<<"[LOG_INFO]"
+#define LOG_INFO simple_debug_printer().stream() << "[LOG_INFO]"
 
+} // namespace lightswing
 
-} //namespace
-
-#endif // LOGGER
-
+#endif // LOGGER_H

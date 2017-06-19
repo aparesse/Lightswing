@@ -1,95 +1,135 @@
-#include "poller.h"
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file poller.cpp
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-10
+
 #include <assert.h>
-#include "ep_event.h"
 #include <algorithm>
 #include <unistd.h>
+#include "epollevent.h"
+#include "poller.h"
 #include "../logger.h"
-namespace lightswing {
 
+namespace lightswing
+{
 const int kMAX_EPOLL_NUM = 65535;
 
-
-Poller::Poller()  :
-    epoll_socket_(::epoll_create(kMAX_EPOLL_NUM)),
-    events_(kMAX_EPOLL_NUM),
-    events_map_()
+poller::poller() :
+	epoll_socket_(::epoll_create(kMAX_EPOLL_NUM)),
+	events_(kMAX_EPOLL_NUM),
+	events_map_()
 {
 
 }
 
-Poller::~Poller()
+poller::~poller()
 {
-    ::close(epoll_socket_);
+	::close(epoll_socket_);
 }
 
-void Poller::add_event(EpollEvent *event) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    assert(event);
-    add(event->fd(), event->events());
-    events_map_[event->fd()] = event;
-}
-
-void Poller::delete_event(EpollEvent *event) {
-    assert(event);
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        auto iter = events_map_.find(event->fd());
-        assert(iter != events_map_.end());
-        events_map_.erase(iter);
-    }
-    del(event->fd(), event->events());
-}
-
-void Poller::update_event(EpollEvent *event)
+void poller::add_event(epollevent* event)
 {
-    assert(event);
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        events_map_[event->fd()] = event;
-    }
-    mod(event->fd(), event->events());
+	std::lock_guard<std::mutex> lock(mutex_);
+	assert(event);
+	add(event->fd(), event->events());
+	events_map_[event->fd()] = event;
 }
 
-int Poller::wait(std::vector<EpollEvent *> *active_events, int interval) {
-    int events_num = ::epoll_wait(epoll_socket_,
-                                  &*events_.begin(),
-                                  kMAX_EPOLL_NUM, interval);
-    if (events_num < 0) {
-        return events_num;
-    }
-    std::lock_guard<std::mutex> lock(mutex_);
-    std::for_each(events_.begin(), events_.begin() + events_num, [=](epoll_event event) {
-        auto ch = events_map_.find(event.data.fd);
-        assert(ch != events_map_.end());
-        EpollEvent *pevent = ch->second;
-        assert(pevent->fd() == event.data.fd);
-        pevent->set_revents(event.events); //当前触发的事件
-        active_events->push_back(pevent);  //所有活动的event被保存在一个vector
-    });
-    return 0;
+void poller::delete_event(epollevent* event)
+{
+	assert(event);
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		auto iter = events_map_.find(event->fd());
+		assert(iter != events_map_.end());
+		events_map_.erase(iter);
+	}
+	del(event->fd(), event->events());
 }
 
-void Poller::ctl(int fd, uint32_t events, int op) {
-    struct epoll_event ev;
-    ev.data.fd = fd;
-    ev.events = events;
-    ::epoll_ctl(epoll_socket_, op, fd, &ev);
-}
-void Poller::add(int fd, uint32_t events) {
-    ctl(fd, events, EPOLL_CTL_ADD);
+
+void poller::update_event(epollevent* event)
+{
+	assert(event);
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		events_map_[event->fd()] = event;
+	}
+	mod(event->fd(), event->events());
 }
 
-void Poller::mod(int fd, uint32_t events) {
-    ctl(fd, events, EPOLL_CTL_MOD);
+int poller::wait(std::vector<epollevent*>* active_events, int interval)
+{
+	int event_num = ::epoll_wait(epoll_socket_,
+				&*events_.begin(),
+				kMAX_EPOLL_NUM,
+				interval);
+
+	if (event_num < 0)
+	{
+		return event_num;
+	}
+
+	std::lock_guard<std::mutex> lock(mutex_);
+	std::for_each(events_.begin(), events_.begin() + event_num,
+				[=](epoll_event event)
+				{
+					auto ch = events_map_.find(event.data.fd);
+					assert(ch != events_map_.end());
+					epollevent* pevent = ch->second;
+					assert(pevent->fd() == event.data.fd);
+					// triggered event currently
+					pevent->set_revents(event.events);
+					// save all active event to a vector
+					active_events->push_back(pevent);
+				});
+	return 0;
 }
 
-void Poller::del(int fd, uint32_t events) {
-    ctl(fd, events, EPOLL_CTL_DEL);
+void poller::ctl(int fd, uint32_t events, int op)
+{
+	struct epoll_event ev;
+	ev.data.fd = fd;
+	ev.events = events;
+	::epoll_ctl(epoll_socket_, op, fd, &ev);
 }
 
-struct epoll_event& Poller::get_event(std::size_t i) {
-    assert(i < kMAX_EPOLL_NUM);
-    return events_[i];
+void poller::add(int fd, uint32_t events)
+{
+	ctl(fd, events, EPOLL_CTL_ADD);
 }
 
-} //namespace
+void poller::del(int fd, uint32_t events)
+{
+	ctl(fd, events, EPOLL_CTL_DEL);
+}
+
+void poller::mod(int fd, uint32_t events)
+{
+	ctl(fd, events, EPOLL_CTL_MOD);
+}
+
+struct epoll_event& poller::get_event(std::size_t i)
+{
+	assert(i < kMAX_EPOLL_NUM);
+	return events_[i];
+}
+
+} // lightswing

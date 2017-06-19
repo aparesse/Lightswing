@@ -1,90 +1,124 @@
-#ifndef CO_MUTEX
-#define CO_MUTEX
-#include "utils.h"
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file co_mutex.h
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-12
+
+#ifndef CO_MUTEX_H
+#define CO_MUTEX_H
+
 #include <atomic>
 #include <mutex>
-namespace lightswing {
+#include "exec_coroutine.h"
+#include "runtime.h"
 
-class CoMutex{
+namespace lightswing
+{
+
+class comutex
+{
 public:
-    CoMutex();
-    void lock();
-    void unlock();
+	comutex();
+	void lock();
+	void unlock();
+
 private:
-    void lock_lockfree_aux();
-    void lock_aux();
+	void lock_free_aux();
+	void lock_aux();
+
 private:
-    std::atomic_int contenders_;
-    std::mutex mutex_;
+	std::atomic_int contenders_;
+	std::mutex mutex_;
+
 };
 
-
-//todo 最好改成编译期判断
-inline CoMutex::CoMutex() :
-    contenders_(0),
-    mutex_()
+//TODO: the best way that is checking in compile phrase
+inline comutex::comutex() :
+	contenders_(0),
+	mutex_()
 {
 
 }
 
-//inline CoMutex::CoMutex(CoMutex && other) :
-//    contenders_(std::move(other.contenders_)),
-//    mutex_(other.mutex_)
-//{
+//TODO: add a move constructor
 
-//}
-
-inline void CoMutex::lock() {
-    Runtime* runtime = Runtime::instance();
-    if (runtime->max_procs() > 1) {
-        lock_aux();
-    } else {
-        lock_lockfree_aux();
-    }
+inline void comutex::lock()
+{
+	runtime* pruntime = runtime::instance();
+	if (pruntime->max_procs() > 1)
+	{
+		lock_aux();
+	}
+	else
+	{
+		lock_free_aux();
+	}
 }
 
-inline void CoMutex::unlock() {
-    --contenders_;
+inline void comutex::unlock()
+{
+	--contenders_;
 }
 
-inline void CoMutex::lock_lockfree_aux() {
-    while (contenders_ > 0) {
-        yield();
-    }
-    ++contenders_;
+inline void comutex::lock_aux()
+{
+	while (true)
+	{
+		while (contenders_ > 0)
+			coroutine_yield();
+
+		if (mutex_.try_lock())
+		  break;
+	}
+	++contenders_;
+	mutex_.unlock();
 }
 
-inline void CoMutex::lock_aux() {
-    while (true) {
-        while (contenders_ > 0) {
-            yield();
-        }
-        if (mutex_.try_lock()) {
-            break;
-        }
-    }
-    ++contenders_;
-    mutex_.unlock();
-
+inline void comutex::lock_free_aux()
+{
+	while (contenders_ > 0)
+	  coroutine_yield();
+	++contenders_;
 }
 
-class MutexGuard {
+class mutexguard
+{
 public:
-    MutexGuard (CoMutex& mut);
-    ~MutexGuard();
+	mutexguard(comutex& comtx);
+	~mutexguard();
+
 private:
-    CoMutex &mutex_;
+	comutex& comutex_;
+
 };
 
-inline MutexGuard::MutexGuard(CoMutex &mut) :
-    mutex_(mut) {
-    mutex_.lock();
+inline mutexguard::mutexguard(comutex& comtx) :
+	comutex_(comtx)
+{
+	comutex_.lock();
 }
 
-inline MutexGuard::~MutexGuard() {
-    mutex_.unlock();
+inline mutexguard::~mutexguard()
+{
+	comutex_.unlock();
 }
 
-}
-#endif // CO_MUTEX
+} // namespace lightswing
 
+#endif // CO_MUTEX_H

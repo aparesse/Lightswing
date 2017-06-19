@@ -1,77 +1,96 @@
-#ifndef RUNTIME
-#define RUNTIME
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file runtime.h
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-11
+
+#ifndef RUNTIME_H
+#define RUNTIME_H
 #include <cstddef>
-#include <assert.h>
+#include <cassert>
 #include <functional>
 #include "singleton.h"
 #include "schedule.h"
-//#include "memory/memory_pool.h"
-#include "thread_pool.h"
+#include "threadpool.h"
 #include "logger.h"
-#include "event/event_manager.h"
-namespace lightswing {
+#include "event/eventmanager.h"
+#include "coroutine.h"
 
+namespace lightswing
+{
 
-class Runtime{
+class runtime
+{
 public:
+	friend class threadcontext;
+	friend class goroutine;
+	friend void yield();
 
 public:
-    typedef Schedule::Function Func;
-    friend class ThreadContext;
-    friend class Goroutine;
-    friend void yield();
-public:
+	runtime();
+	~runtime();
 
-    Runtime();
+	static runtime* instance();
 
-    ~Runtime();
+	void on_event(const std::string& ev, eventmanager::func fn);
+	void emit_event(const std::string& ev) const;
 
-    static Runtime* instance();
+	coroutine::pointer new_coroutine(std::function<void()> fn);
+	void set_max_procs(std::size_t num);
+	std::size_t max_procs() const;
 
-    void on_event(const std::string& ev, EventManager::Func func);
+	template<typename...Arg>
+	void start(Arg&&... arg);
 
-    void emit_event(const std::string& ev) const;
+	void set_loop_interval(std::size_t interval);
 
-    Coroutine::Pointer new_coroutine(std::function<void()> func);
+	eventmanager& event_manager();
 
-    void set_max_procs(std::size_t num);
+	int get_thread_id() const;
 
-    std::size_t max_procs() const;
-
-    template<class ...Arg>
-    void start(Arg&& ...arg);
-
-    void set_loop_interval(std::size_t interval);
-
-    EventManager& event_manager();
-
-    int get_thread_id() const;
-
-    void yield();
+	void yield();
 
 private:
-    Runtime& operator=(const Runtime& other) = delete;
-    Runtime(const Runtime& other) = delete;
+	runtime& operator=(const runtime& other) = delete;
+	runtime(const runtime& other) = delete;
 
 private:
-    std::size_t core_num_;
-    Schedule schedule_;
-    ThreadPool threadpool_;
-    EventManager event_manager_;
+	std::size_t core_num_;
+	schedule schedule_;
+	threadpool threadpool_;
+	eventmanager event_manager_;
+
 };
 
-template<class ...Arg>
-inline void Runtime::start(Arg && ...arg) {
-    assert(!threadpool_.is_running());
-    schedule_.init(core_num_);
-    threadpool_.start(core_num_);
-    auto func = std::bind(std::forward<Arg>(arg)...);
-    new_coroutine(func);
-    while (!schedule_.empty()) {
-        event_manager_.loop();
-    }
+template<typename... Arg>
+void runtime::start(Arg&&... arg)
+{
+	assert(!threadpool_.is_running());
+	schedule_.init(core_num_);
+	threadpool_.start(core_num_);
+	auto fn = std::bind(std::forward<Arg>(arg)...);
+	new_coroutine(fn);
+	while (!schedule_.empty())
+	{
+		event_manager_.loop();
+	}
 }
 
-}//namespace
-#endif // RUNTIME
-
+} // namespace lighswing
+#endif // RUNTIME_H

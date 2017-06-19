@@ -1,43 +1,70 @@
-#ifndef SCHEDULE
-#define SCHEDULE
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file schedule.h
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-12
+
+#ifndef SCHEDULE_H
+#define SCHEDULE_H
+
 #include <atomic>
 #include "coroutine.h"
 #include "util/blocking_queue.h"
-namespace lightswing {
+
+namespace lightswing
+{
 
 const int kSTACK_SIZE = 4 * 1024;
-class Schedule {
-    friend struct Coroutine;
+
+class schedule
+{
+	friend class coroutine;
 public:
-    typedef Coroutine::Function Function;
-    typedef std::owner_less<Coroutine::WeakPointer> WeakPtrLess;
-    typedef BlockingQueue<Coroutine::Pointer> CoQueue;
+	typedef coroutine::func func;
+	typedef blockingqueue<coroutine::pointer> co_queue;
+
 public:
-    Schedule();
-    ~Schedule() {}
+	schedule();
+	~schedule();
 
-    void init(int thread_num);
+	void init(int thread_num);
 
-    Coroutine::Pointer new_coroutine(Function func);
+	coroutine::pointer new_coroutine(func fn);
 
-    void push_coroutine(int index, Coroutine::Pointer co);
-    Coroutine::Pointer pop_coroutine(int index);
+	void push_coroutine(int index, coroutine::pointer co);
 
-    std::size_t size() const;
-    bool empty() const;
-    int remove(Coroutine::Pointer co);
+	coroutine::pointer pop_coroutine(int index);
+
+	std::size_t size() const;
+	bool empty() const;
+	int remove(coroutine::pointer co);
 
 private:
-    Schedule& operator=(const Schedule&) = delete;
-    Schedule(const Schedule&) = delete;
+	schedule& operator=(const schedule& other) = delete;
+	schedule(const schedule& other) = delete;
 
 private:
-    mutable std::mutex mutex_;
-    std::vector<CoQueue> coroutines_table_;
-    std::atomic_size_t size_; //原子操作
-    int max_id_;
+	mutable std::mutex mutex_;
+	std::vector<co_queue> coroutine_vec_;
+	std::atomic_size_t size_; // atmoic operation
+	int max_id_;
 };
 
-} //namespace
-#endif // SCHEDULE
-
+} // namespace lightswing
+#endif // SCHEDULE_H

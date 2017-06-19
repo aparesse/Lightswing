@@ -14,39 +14,44 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., Free Road, Shanghai 000000, China.
 // 
-/// @file mutex.cpp
+/// @file threadcontext.h
 /// @synopsis 
 /// @author Lan Jian, air.petrichor@gmail.com
 /// @version v0.0.1
-/// @date 2017-06-18
+/// @date 2017-06-12
 
-#include "../lightswing.h"
+#ifndef THREADCONTEXT_H
+#define THREADCONTEXT_H
+#include <thread>
+#include <ucontext.h>
+#include "coroutine.h"
 
-using namespace lightswing;
-
-void example_mutex()
+namespace lightswing
 {
-	static comutex mutex;
-	static int g_int = 0;
-	LOG_INFO << g_int;
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 11;
-			LOG_INFO << "static var is modified to 11";
-	   });
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 22;
-			LOG_INFO << "static var is modified to 22";
-	   });
+class threadpool;
 
-}
-
-void mutex_main()
+class threadcontext
 {
-	runtime* t_runtime = runtime::instance();
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_mutex);
-}
+	friend void e_run(uint32_t low32, uint32_t hi32);
+	friend class coroutine;
+
+public:
+	threadcontext(int id, threadpool* pool);
+	void start();
+	coroutine::pointer running_coroutine();
+	int id() const;
+
+private:
+	void resume(coroutine::pointer co);
+
+private:
+	int id_;
+	threadpool* pool_;
+	ucontext ctx_;
+	coroutine::weakpointer running_coroutine_;
+};
+
+} // namespace lightswing
+
+
+#endif // THREADCONTEXT_H

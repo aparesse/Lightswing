@@ -1,99 +1,131 @@
-#ifndef CHANNEL
-#define CHANNEL
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file channel.h
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-18
+
+#ifndef CHANNEL_H
+#define CHANNEL_H
+
 #include <memory>
 #include "blocking_queue.h"
-#include "lightswing.h"
 
-namespace lightswing {
-//这个是多线程之间用的通讯工具类，有点鸡肋，弃用。
-//协程之间应该用chan
-template <class T>
-class Channel {
+namespace lightswing
+{
+// multi-threads comunication tool
+
+template<class T>
+class channel
+{
 public:
-    typedef T ValueType;
-    typedef BlockingQueue<ValueType> QueueType;
-    typedef std::shared_ptr<QueueType> QueuePointer;
-    typedef std::shared_ptr<Channel> Pointer;
+	typedef T valuetype;
+	typedef blockingqueue<valuetype> queuetype;
+	typedef std::shared_ptr<queuetype> queuepointer;
+	typedef std::shared_ptr<channel> pointer;
 
 public:
-    Channel();
-    Channel(std::size_t size);
+	channel();
+	channel(std::size_t size);
 
-    //失败（满了） 返回-1
-    int send(const ValueType& value);
-    ValueType recv();
-    Channel<ValueType> brother();
-    std::size_t send_size() const;
-    std::size_t recv_size() const;
+	int send(const valuetype& value);
+	valuetype recv();
+	channel<valuetype> brother();
+	std::size_t send_size() const;
+	std::size_t recv_size() const;
 
 private:
-    struct __PrivateConstruct{};
-    Channel(__PrivateConstruct);
+	struct __privateconstruct
+	{
+	};
+
+	channel(__privateconstruct constructor);
+
 private:
-    QueuePointer send_queue_;
-    QueuePointer recv_queue_;
+	queuepointer send_queue_;
+	queuepointer recv_queue_;
+
 };
 
 const int __BROTHER = 0;
 
 template<class T>
-inline Channel<T> make_channel() {
-    return Channel<T>();
+inline channel<T> make_channel()
+{
+	return channel<T>();
 }
 
 template<class T>
-inline Channel<T>::Channel() :
-    send_queue_(std::make_shared<QueueType>()),
-    recv_queue_(std::make_shared<QueueType>())
+inline channel<T>::channel() :
+	send_queue_(std::make_shared<queuetype>()),
+	recv_queue_(std::make_shared<queuetype>())
+{
+}
+
+template<class T>
+inline channel<T>::channel(std::size_t size) :
+	send_queue_(std::make_shared<queuetype>(size)),
+	recv_queue_(std::make_shared<queuetype>(size))
+{
+}
+
+template<class T>
+inline int channel<T>::send(const valuetype& value)
+{
+	return send_queue_->push(value);
+}
+
+template<class T>
+inline T channel<T>::recv()
+{
+	return recv_queue_->pop();
+}
+
+template<class T>
+inline std::size_t channel<T>::send_size() const
+{
+	return send_queue_->size();
+}
+
+template<class T>
+inline std::size_t channel<T>::recv_size() const
+{
+	return recv_queue_->size();
+}
+
+template<class T>
+inline channel<T> channel<T>::brother()
+{
+	// call overloaded private constructor
+	channel<T> brother_channel{__privateconstruct()};
+	brother_channel.recv_queue_ = send_queue_;
+	brother_channel.send_queue_ = recv_queue_;
+	return brother_channel;
+}
+
+template<class T>
+inline channel<T>::channel(__privateconstruct constructor) :
+	send_queue_(nullptr),
+	recv_queue_(nullptr)
 {
 
 }
 
-template<class T>
-inline Channel<T>::Channel(std::size_t size) :
-    send_queue_(std::make_shared<QueueType>(size)),
-    recv_queue_(std::make_shared<QueueType>(size))
-{
+} // namespace lightswing
 
-}
-
-template<class T>
-inline int Channel<T>::send(const Channel::ValueType &value) {
-    return send_queue_->push(value);
-}
-
-template <class T>
-inline std::size_t Channel<T>::send_size() const {
-    return send_queue_->size();
-}
-
-template <class T>
-inline std::size_t Channel<T>::recv_size() const {
-    return send_queue_->size();
-}
-
-template <class T>
-inline Channel<T> Channel<T>::brother() {
-    //调用private的重载版本构造函数
-    Channel<T> brother_channel{__PrivateConstruct()};
-    brother_channel.recv_queue_ = send_queue_;
-    brother_channel.send_queue_ = recv_queue_;
-    return brother_channel;
-}
-
-template<class T>
-inline T Channel<T>::recv() {
-    return recv_queue_->pop();
-}
-
-template<class T>
-inline Channel<T>::Channel(__PrivateConstruct) :
-    send_queue_(nullptr),
-    recv_queue_(nullptr)
-{
-
-}
-
-}//namespace
-#endif // CHANNEL
-
+#endif // CHANNEL_H

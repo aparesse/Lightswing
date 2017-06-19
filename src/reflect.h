@@ -1,80 +1,109 @@
-#ifndef REFLECT
-#define REFLECT
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file reflect.h
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-17
+
+#ifndef REFLECT_H
+#define REFLECT_H
+
 #include <map>
 #include <string>
-#include "any.h"
+#include "util/any.h"
 #include "singleton.h"
-namespace lightswing {
 
-//非线程安全
-class Reflect {
+namespace lightswing
+{
+
+class reflect
+{
 public:
-    Reflect();
+	reflect();
 
-    static Reflect* instance();
+	static reflect* instance();
 
-    template<class T>
-    void set(const std::string& name, T* value);
+	template<typename T>
+	void set(const std::string& name, T* value);
 
-    Any get(const std::string& name) const;
-
-private:
-    Reflect& operator=(const Reflect&) = delete;
-    Reflect(const Reflect&) = delete;
+	any get(const std::string& name) const;
 
 private:
-    std::map<std::string, Any> objects_;
+	reflect& operator=(const reflect&) = delete;
+	reflect(const reflect&) = delete;
+
+private:
+	std::map<std::string, any> objects_;
 };
 
-inline Reflect::Reflect() :
-    objects_() {
-
+inline reflect::reflect() :
+	objects_()
+{
 }
 
-Reflect *Reflect::instance() {
-    return Singleton<Reflect>::instance();
+reflect* reflect::instance()
+{
+	return singleton<reflect>::instance();
 }
 
-inline Any Reflect::get(const std::string &name) const {
-    auto iter = objects_.find(name);
-    if (iter == objects_.end()) {
-        return Any();
-    }
-    return iter->second;
+inline any reflect::get(const std::string& name) const
+{
+	auto iter = objects_.find(name);
+	if (iter == objects_.end())
+	  return any();
+	return iter->second;
 }
 
-template<class T>
-inline void Reflect::set(const std::string &name, T *value) {
-    objects_[name] = value;
+template<typename T>
+inline void reflect::set(const std::string& name, T* value)
+{
+	objects_[name] = value;
 }
 
-inline Any get_reflect(const std::string& name) {
-    Reflect* reflect = Reflect::instance();
-    return reflect->get(name);
+inline any get_reflect(const std::string& name)
+{
+	reflect* refl = reflect::instance();
+	return refl->get(name);
 }
 
-//失败返回-1,成功返回0
-template<class T>
-inline int get_reflect(const std::string& name, T** result) {
-    assert(result);
-    assert(*result);
-    Any any = get_reflect(name);
-    if (typeid(T*) == any.type()) {
-        T* pointer = any_cast<T*>(any);
-        *result = pointer;
-        return 0;
-    }
-    return -1;
+template<typename T>
+inline int get_reflect(const std::string& name, T** result)
+{
+	assert(result);
+	assert(*result);
+	any obj = get_reflect(name);
+	if (typeid(T*) == obj.type())
+	{
+		T* pointer = any_cast<T*>(obj);
+		*result = pointer;
+		return 0;
+	}
+	return -1;
 }
 
+#define REG_REFLECT(s)                                      \
+do                                                          \
+{                                                           \
+	reflect* t_reflect = reflect::intance();                \
+	t_reflect->set(#s, &s);                                 \
+}                                                           \
+while (0)                                                    \
 
-#define REG_REFLECT(s) \
-                                    do {                                                                                                \
-                                        Reflect* __reflect_ = Reflect::instance();                                 \
-                                        __reflect_->set(#s, &s);                                                             \
-                                    }while(0)
+} // namespace lightswing
 
-
-}//namespace
-#endif // REFLECT
-
+#endif // REFLECT_H

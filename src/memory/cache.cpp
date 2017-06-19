@@ -1,35 +1,63 @@
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file cache.cpp
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-17
+
 #include "cache.h"
 
-namespace lightswing {
-
-Cache::Cache() :
-    freelists_(Central::kBIG_OBJECT_BYTES / Central::kBYTES_ALIGN)
+namespace lightswing
+{
+cache::cache() :
+	freelists_(central::kBIG_OBJECT_BYTES / central::kBYTE_ALIGN)
 {
 }
 
-void Cache::deallocate(void *p, std::size_t size) {
-    std::size_t index = Central::index(size);
-    MemoryList& mlist = freelists_[index];
-    mlist.push_back((char *)p);
+void cache::deallocate(void* p, std::size_t size)
+{
+	std::size_t index = central::index(size);
+	memorylist& mlist = freelists_[index];
+	mlist.push_back((char*)p);
 }
 
-void *Cache::allocate(std::size_t size) {
-    std::size_t index = Central::index(size);
-    MemoryList& mlist = freelists_[index];
-    if (mlist.empty()) {
-        return nullptr;
-    }
-    void *result = (void*)mlist.back();
-    mlist.pop_back();
-    return result;
+void* cache::allocate(std::size_t size)
+{
+	std::size_t index = central::index(size);
+	memorylist& mlist = freelists_[index];
+	if (mlist.empty())
+	{
+		return nullptr;
+	}
+	void* result = (void*)mlist.back();
+	mlist.pop_back();
+	return result;
 }
 
-void Cache::fill(const MemoryList &ptrs, std::size_t level) {
-    assert(level < freelists_.size());
-    MemoryList& mlist = freelists_[level];
-    for (auto ptr : ptrs) {
-        mlist.push_back(ptr);
-    }
+void cache::expansion(const memorylist& ptrs, std::size_t level)
+{
+	assert(level < freelists_.size());
+	memorylist& mlist = freelists_[level];
+	for (auto ptr : ptrs)
+	{
+		mlist.push_back(ptr);
+	}
 }
 
-}//namespace
+
+}

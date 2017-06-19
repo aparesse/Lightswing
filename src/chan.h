@@ -1,154 +1,125 @@
-#ifndef CO_CONDITION
-#define CO_CONDITION
-#include <queue>
-#include <memory>
-#include "util/slice.h"
-#include "co_mutex.h"
-#include "util/blocking_queue.h"
-namespace lightswing {
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file chan.h
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-12
+
+#ifndef CHAN_H
+#define CHAN_H
+
+#include "co_queue.h"
+namespace lightswing
+{
 
 template<class T>
-class CoQueue {
+class chan : public std::enable_shared_from_this<chan<T>>
+{
 public:
-    CoQueue(std::size_t size) : queue_(),
-        mutex_(),
-        max_size_(size) {}
+	typedef T valuetype;
+	typedef std::shared_ptr<chan<valuetype>> pointer;
+	typedef std::weak_ptr<chan<valuetype>> weakpointer;
+	typedef coqueue<valuetype> chanqueue;
+	typedef std::shared_ptr<chanqueue> queuepointer;
 
-    CoQueue() : queue_(),
-        mutex_(),
-        max_size_(kDEFAULT_BLKQUEUE_SIZE) {}
+	template<typename _Tp, typename... _Args>
+	friend std::shared_ptr<_Tp> make_shared(_Args&&... __args);
 
-    int push(T new_value) {
-        MutexGuard lock(mutex_);
-        if (queue_.size() >= max_size_) {
-            return -1;
-        }
-        queue_.push(std::move(new_value));
-        return 0;
-    }
+public:
+	chan();
+	chan(queuepointer, queuepointer, pointer);
 
-    bool empty() const {
-        MutexGuard lock(mutex_);
-        return queue_.empty();
-    }
+	// use move
+	int send(T value);
+	int recv(T&);
 
-    T pop() {
-        mutex_.lock();
-        while (queue_.empty()) {
-            mutex_.unlock();
-            yield();
-            mutex_.lock();
-        }
-
-        T value = std::move(queue_.front());
-        queue_.pop();
-        mutex_.unlock();
-        return value;
-    }
-
-    std::size_t size() const {
-        MutexGuard lock(mutex_);
-        return queue_.size();
-    }
+	pointer brother();
 
 private:
-    CoQueue(const CoQueue& other) = delete;
-    CoQueue& operator=(const CoQueue& other) = delete;
+	queuepointer recv_queue_;
+	queuepointer send_queue_;
+	weakpointer brother_;
 
-private:
-    std::queue<T> queue_;
-    mutable CoMutex mutex_;
-    std::size_t max_size_;
 };
 
-template <class T>
-class Chan : public std::enable_shared_from_this<Chan<T>>{
+// template initialization declaretion
+typedef typename chan<int>::pointer intchan;
+typedef typename chan<std::string>::pointer stringchan;
+typedef typename chan<slice>::pointer slicechan;
 
-public:
-    typedef T ValueType;
-    typedef std::shared_ptr<Chan<ValueType>> Pointer;
-    typedef std::weak_ptr<Chan<ValueType>> WeakPointer;
-    typedef CoQueue<ValueType> Queue;
-    typedef std::shared_ptr<Queue> QueuePointer;
-
-    template<typename _Tp, typename... _Args>
-    friend std::shared_ptr<_Tp> make_shared(_Args&&... __args);
-
-
-public:
-    Chan();
-    Chan(QueuePointer, QueuePointer, Pointer);
-
-    //使用move
-    int send(T value);
-    int recv(T&);
-
-    Pointer brother();
-
-
-private:
-    QueuePointer recv_queue_;
-    QueuePointer send_queue_;
-    WeakPointer brother_;
-};
-
-typedef typename Chan<int>::Pointer IntChan;
-typedef typename Chan<std::string>::Pointer StrChan;
-typedef typename Chan<Slice>::Pointer SliceChan;
-
-
+// template initialization definition
 template<class Type>
-static typename Chan<Type>::Pointer make_chan() {
-    return std::make_shared<Chan<Type>>();
+static typename chan<Type>::pointer make_chan()
+{
+	return std::make_shared<chan<Type>>();
 }
 
 template<class T>
-inline Chan<T>::Chan() :
-    recv_queue_(std::make_shared<Queue>()),
-    send_queue_(std::make_shared<Queue>()),
-    brother_()
+inline chan<T>::chan() :
+	recv_queue_(std::make_shared<chanqueue>()),
+	send_queue_(std::make_shared<chanqueue>()),
+	brother_()
 {
 }
 
-template <class T>
-inline int Chan<T>::send(T value) {
-    auto brother = brother_.lock();
-    if (!brother) {
-        return -1;
-    }
-    send_queue_->push(std::move(value));
-    return 0;
-}
-
-template <class T>
-inline int Chan<T>::recv(T &value) {
-    auto brother = brother_.lock();
-    if (!brother && recv_queue_->empty()) {
-        return -1;
-    }
-    value =  recv_queue_->pop();
-    return 0;
-}
-
-template <class T>
-inline typename Chan<T>::Pointer Chan<T>::brother() {
-    std::shared_ptr<Chan<T> > myself =  this->shared_from_this();
-    Pointer brother = std::make_shared<Chan<T>>
-                                                (send_queue_,recv_queue_, myself);
-    brother_ = brother;
-    return brother;
-}
-
-template <class T>
-inline Chan<T>::Chan(QueuePointer sendptr,
-                     QueuePointer recvptr,
-                     Pointer brother) :
-    recv_queue_(sendptr),
-    send_queue_(recvptr),
-    brother_(brother)
+template<class T>
+inline chan<T>::chan(queuepointer recv_queue, queuepointer send_queue, pointer brother) :
+	recv_queue_(recv_queue),
+	send_queue_(send_queue),
+	brother_(brother)
 {
 }
 
+template<class T>
+inline int chan<T>::send(T value)
+{
+	auto brother = brother_.lock();
+	if (!brother)
+	{
+		return -1;
+	}
+	send_queue_->push(std::move(value));
+	return 0;
 }
-#endif // CO_CONDITION
 
+template<class T>
+inline int chan<T>::recv(T& value)
+{
+	auto brother = brother_.lock();
+	if (!brother && recv_queue_->empty())
+	{
+		return -1;
+	}
+	value = recv_queue_->pop();
+	return 0;
+}
+
+
+template<class T>
+inline typename chan<T>::pointer chan<T>::brother()
+{
+	std::shared_ptr<chan<T>> myself = this->shared_from_this();
+	pointer brother = std::make_shared<chan<T>>(send_queue_,
+				                                recv_queue_,
+				                                myself);
+	brother_ = brother;
+	return brother;
+}
+
+} // namespace lightswing
+#endif // CHAN_H

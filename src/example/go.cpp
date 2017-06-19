@@ -1,28 +1,52 @@
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file go.cpp
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-18
+
 #include "../lightswing.h"
+
 using namespace lightswing;
 
-void go_func(int a, int b, int c) {
-    LOG_INFO<<"a:" <<a <<", b:" <<b <<", c:" <<c;
+void go_func(int a, int b, int c)
+{
+	LOG_INFO << "a: " << a << ", b: " << b << ", c: " << c;
 }
 
-void example_go() {
-    //go支持可变参数
-    go(go_func, 66,22,33);
-    //支持各种lambda表达式
-    go([] () {
-        for (int i = 0; i < 10; ++i) {
-            LOG_INFO<<"hello :"<<i;
-            //让出时间片
-            yield();
-        }
-    });
+void example_go()
+{
+	// go-coroutine supports variable arguments
+	go([] ()
+	   {
+			for (int i = 0; i < 10; ++i)
+			{
+				LOG_INFO << "hello: " << i;
+				
+				coroutine_yield();
+			}
+	   });
 }
 
-//请改成int main ()函数
-void go_main () {
-    Runtime* runtime = Runtime::instance();
-    //设置核心数量
-    runtime->set_max_procs(3);
-    //启动main
-    runtime->start(example_go);
+int go_main()
+{
+	runtime* t_runtime = runtime::instance();
+	t_runtime->set_max_procs(3);
+	t_runtime->start(example_go);
+	return 0;
 }

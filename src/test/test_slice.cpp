@@ -14,39 +14,25 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., Free Road, Shanghai 000000, China.
 // 
-/// @file mutex.cpp
+/// @file test_slice.cpp
 /// @synopsis 
 /// @author Lan Jian, air.petrichor@gmail.com
 /// @version v0.0.1
-/// @date 2017-06-18
+/// @date 2017-06-19
 
-#include "../lightswing.h"
+#include "test.h"
+#include "../util/slice.h"
 
-using namespace lightswing;
-
-void example_mutex()
+namespace test
 {
-	static comutex mutex;
-	static int g_int = 0;
-	LOG_INFO << g_int;
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 11;
-			LOG_INFO << "static var is modified to 11";
-	   });
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 22;
-			LOG_INFO << "static var is modified to 22";
-	   });
 
+void test_slice()
+{
+	lightswing::slice sli1("hello world");
+	lightswing::slice sli2("good morning");
+	lightswing::slice sli3 = sli1 + sli2;
+	DEBUG_INFO << sli3;
+	EXCEPT_EQ(sli3, "hello world good morning");
 }
 
-void mutex_main()
-{
-	runtime* t_runtime = runtime::instance();
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_mutex);
-}
+} // namespace lightswing

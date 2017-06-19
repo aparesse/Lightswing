@@ -1,74 +1,100 @@
-#include "coroutine.h"
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file coroutine.cpp
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-11
+
 #include <iostream>
 #include <assert.h>
-#include <string.h>
+#include <string>
 #include "schedule.h"
-#include "thread_context.h"
-namespace lightswing {
+#include "coroutine.h"
+#include "threadcontext.h"
 
-void Coroutine::save_stack() {
-//    char dummy = 0;
-//    assert(stack_bottom_ > &dummy);
-//    uint64_t distance = stack_bottom_ - &dummy;
-//    assert(distance < (uint64_t)(stack_bottom_ - stack_top_));
-//    stack_.resize(distance);
-//    ::memcpy(stack_top(), &dummy, stack_.size());
-}
-
-Coroutine::Coroutine()  :
-    stack_(kSTACK_MAX_SIZE),
-    func_(),
-    status_(eDEAD),
-    id_(-1)
+namespace lightswing
 {
 
+coroutine::coroutine() :
+	stack_(kSTACK_MAX_SIZE),
+	fn_(),
+	status_(eDEAD),
+	id_(-1)
+{
+	
 }
 
-void Coroutine::yield() {
-    //save_stack();
-    assert(status_ == Coroutine::eRUNNING);
-    status_ =  Coroutine::eSUSPEND;
-    swapcontext(&ctx_ , ctx_.uc_link);
-    //swapcontext(&ctx_, &(tcontext_->ctx_));
+void coroutine::yield()
+{
+	assert(status_ == coroutine::eRUNNING);
+	status_ = coroutine::eSUSPEND;
+	swapcontext(&ctx_, ctx_.uc_link);
 }
 
-void Coroutine::swap_context(ucontext* context) {
-    //swapcontext(&ctx_ , &schedule_->main_ctx_);
-    swapcontext(&ctx_ , context);
-}
-
-void Coroutine::set_func(Coroutine::Function func) {
-    func_ = std::move(func);
-}
-
-Coroutine::Pointer Coroutine::create() {
-    return std::make_shared<Coroutine>();
-}
-
-ucontext_t *Coroutine::context() {
-    return &ctx_;
-}
-
-std::size_t Coroutine::stack_size() const {
-    return stack_.size();
-}
-
-Coroutine::Status Coroutine::status() const {
-    return status_;
-}
-
-void Coroutine::set_status(Status status) {
-    status_ = status;
-}
-
-char *Coroutine::stack_top() {
-    return &*stack_.begin();
-}
-
-//void Coroutine::resume() {
-//     //schedule_->resume(shared_from_this());
+//void coroutine::resume()
+//{
+//	schedule_ = resume(shared_from_this());
 //}
 
+void coroutine::swap_context(ucontext* context)
+{
+	swapcontext(&ctx_, context);
+}
 
-} //namespace
+void coroutine::set_func(func fn)
+{
+	fn_ = std::move(fn);
+}
+
+coroutine::pointer coroutine::create()
+{
+	return std::make_shared<coroutine>();
+}
+
+ucontext_t* coroutine::context()
+{
+	return &ctx_;
+}
+
+std::size_t coroutine::stack_size() const
+{
+	return stack_.size();
+}
+
+coroutine::estatus coroutine::status() const
+{
+	return status_;
+}
+
+void coroutine::set_status(coroutine::estatus status)
+{
+	status_ = status;
+}
+
+char* coroutine::stack_top()
+{
+	return &*stack_.begin();
+}
+
+void coroutine::save_stack()
+{
+	
+}
+
+}
 

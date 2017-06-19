@@ -1,68 +1,98 @@
+// Copyright (C) 
+// 
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU GeneratorExiteral Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., Free Road, Shanghai 000000, China.
+// 
+/// @file runtime.cpp
+/// @synopsis 
+/// @author Lan Jian, air.petrichor@gmail.com
+/// @version v0.0.1
+/// @date 2017-06-12
+
 #include "runtime.h"
-namespace lightswing {
 
-Runtime *Runtime::instance() {
-    return Singleton<Runtime>::instance();
-}
-
-Runtime::Runtime() :
-    core_num_(1),
-    schedule_(),
-    threadpool_(),
-    event_manager_()
+namespace lightswing
 {
-    LOG_INFO<<"运行时启动";
-}
-
-Runtime::~Runtime()
+runtime::runtime() :
+	core_num_(1),
+	schedule_(),
+	threadpool_(),
+	event_manager_()
 {
-    LOG_INFO<<"运行时已关闭";
+	LOG_INFO << "runtime begin";	
 }
 
-void Runtime::set_max_procs(std::size_t num) {
-    assert(num > 0);
-    core_num_ = num;
+runtime* runtime::instance()
+{
+	return singleton<runtime>::instance();
 }
 
-std::size_t Runtime::max_procs() const {
-    return core_num_ ;
+runtime::~runtime()
+{
+	LOG_INFO << "runtime end";
 }
 
-EventManager &Runtime::event_manager() {
-    return event_manager_;
+void runtime::set_max_procs(std::size_t num)
+{
+	assert(num > 0);
+	core_num_ = num;
 }
 
-int Runtime::get_thread_id() const {
-    const ThreadPool::ThreadMap& m = threadpool_.thread_map();
-    auto iter = m.find(std::this_thread::get_id());
-    if (iter == m.end()) {
-        return -1;
-    }
-    return iter->second->id();
+std::size_t runtime::max_procs() const
+{
+	return core_num_;
 }
 
-void Runtime::yield() {
-    ThreadPool::ThreadMap& m = threadpool_.thread_map();
-    auto iter = m.find(std::this_thread::get_id());
-    if (iter == m.end()) {
-        LOG_DEBUG<<"请勿在非协程线程使用yield";
-        return;
-    }
-    iter->second->running_coroutine()->yield();
+eventmanager& runtime::event_manager()
+{
+	return event_manager_;
 }
 
-void Runtime::on_event(const std::string &ev, EventManager::Func func) {
-    event_manager_.register_event(ev, std::move(func));
+int runtime::get_thread_id() const
+{
+	const threadpool::threadmap& m = threadpool_.thread_map();
+	auto iter = m.find(std::this_thread::get_id());
+	if (iter == m.end())
+	  return -1;
+	return iter->second->id();
 }
 
-void Runtime::emit_event(const std::string &ev) const {
-    event_manager_.emit_event(ev);
+void runtime::yield()
+{
+	threadpool::threadmap& m = threadpool_.thread_map();
+	auto iter = m.find(std::this_thread::get_id());
+	if (iter == m.end())
+	{
+		LOG_DEBUG << "coroutine run out of thread forbidden";
+		return;
+	}
+	iter->second->running_coroutine()->yield();
 }
 
-Coroutine::Pointer Runtime::new_coroutine(std::function<void()> func) {
-    return schedule_.new_coroutine([func] (Coroutine::Pointer) {
-        func();
-    });
+void runtime::on_event(const std::string& ev, eventmanager::func fn)
+{
+	event_manager_.register_event(ev, std::move(fn));
+}
+
+void runtime::emit_event(const std::string& ev) const
+{
+	event_manager_.emit_event(ev);
+}
+
+coroutine::pointer runtime::new_coroutine(std::function<void()> fn)
+{
+	return schedule_.new_coroutine([fn] (coroutine::pointer) { fn(); });
 }
 
 }

@@ -14,39 +14,52 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., Free Road, Shanghai 000000, China.
 // 
-/// @file mutex.cpp
+/// @file eventloop.h
 /// @synopsis 
 /// @author Lan Jian, air.petrichor@gmail.com
 /// @version v0.0.1
-/// @date 2017-06-18
+/// @date 2017-06-10
 
-#include "../lightswing.h"
+#ifndef EVENTLOOP_H
+#define EVENTLOOP_H
 
-using namespace lightswing;
-
-void example_mutex()
+#include <memory>
+#include <vector>
+#include <functional>
+namespace lightswing
 {
-	static comutex mutex;
-	static int g_int = 0;
-	LOG_INFO << g_int;
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 11;
-			LOG_INFO << "static var is modified to 11";
-	   });
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 22;
-			LOG_INFO << "static var is modified to 22";
-	   });
 
-}
+class epollevent;
+class poller;
 
-void mutex_main()
+class eventloop
 {
-	runtime* t_runtime = runtime::instance();
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_mutex);
-}
+public:
+	typedef std::function<void()> task_fn;
+public:
+	eventloop();
+	~eventloop();
+
+	void loop(std::size_t interval);
+
+	std::size_t epollevent_nums() const;
+
+	void add_event(epollevent* event);
+	void delete_event(epollevent* event);
+	void update_event(epollevent* event);
+
+private:
+	// nocopyable
+	eventloop& operator=(const eventloop&) = delete;
+	eventloop(const eventloop&) = delete;
+	eventloop(eventloop&&) = delete;
+	
+private:
+	std::vector<epollevent*> active_events_;
+	std::shared_ptr<poller> poller_;
+
+};
+
+} // namespace lightswing
+
+#endif // EVENTLOOP_H

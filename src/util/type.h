@@ -14,39 +14,41 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., Free Road, Shanghai 000000, China.
 // 
-/// @file mutex.cpp
+/// @file type.h
 /// @synopsis 
 /// @author Lan Jian, air.petrichor@gmail.com
 /// @version v0.0.1
-/// @date 2017-06-18
+/// @date 2017-06-16
 
-#include "../lightswing.h"
+#ifndef TYPE_H
+#define TYPE_H
 
-using namespace lightswing;
+#include <sstream>
+#include <string>
 
-void example_mutex()
+namespace lightswing
 {
-	static comutex mutex;
-	static int g_int = 0;
-	LOG_INFO << g_int;
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 11;
-			LOG_INFO << "static var is modified to 11";
-	   });
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 22;
-			LOG_INFO << "static var is modified to 22";
-	   });
-
-}
-
-void mutex_main()
+class __integer
 {
-	runtime* t_runtime = runtime::instance();
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_mutex);
-}
+public:
+	__integer(int value) : value_(value) {}
+
+	std::string to_string() const 
+	{
+		std::stringstream ss;
+		ss << value_;
+		return ss.str();
+	}
+
+	bool operator==(int value)
+	{
+		return value_ = value;
+	}
+private:
+	int value_;
+
+};
+
+} // namespace lightswing
+
+#endif // TYPE_H

@@ -14,39 +14,56 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., Free Road, Shanghai 000000, China.
 // 
-/// @file mutex.cpp
+/// @file errcode.h
 /// @synopsis 
 /// @author Lan Jian, air.petrichor@gmail.com
 /// @version v0.0.1
-/// @date 2017-06-18
+/// @date 2017-06-17
 
-#include "../lightswing.h"
+#ifndef NET_BASIC_H
+#define NET_BASIC_H
 
-using namespace lightswing;
+#include <string>
+#include <cstring>
 
-void example_mutex()
+namespace lightswing
 {
-	static comutex mutex;
-	static int g_int = 0;
-	LOG_INFO << g_int;
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 11;
-			LOG_INFO << "static var is modified to 11";
-	   });
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 22;
-			LOG_INFO << "static var is modified to 22";
-	   });
 
-}
-
-void mutex_main()
+class errcode
 {
-	runtime* t_runtime = runtime::instance();
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_mutex);
-}
+public:
+	const static int kOK = -1;
+	const static int kERROR = -2;
+	const static int kEOF = -3;
+
+	errcode(int code, std::string msg) :
+		code_(code),
+		msg_(std::move(msg))
+	{
+	}
+
+	errcode(int code) :
+		code_(code),
+		msg_(::strerror(code))
+	{
+	}
+
+	int code() const
+	{
+		return code_;
+	}
+
+	std::string msg() const
+	{
+		return msg_;
+	}
+
+private:
+	int code_;
+	std::string msg_;
+
+};
+
+} // namespace lightswing
+
+#endif // NET_BASIC_H

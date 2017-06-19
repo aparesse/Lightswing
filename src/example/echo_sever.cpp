@@ -14,7 +14,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., Free Road, Shanghai 000000, China.
 // 
-/// @file mutex.cpp
+/// @file echo_sever.cpp
 /// @synopsis 
 /// @author Lan Jian, air.petrichor@gmail.com
 /// @version v0.0.1
@@ -24,29 +24,46 @@
 
 using namespace lightswing;
 
-void example_mutex()
+void handle_conn(tcpconn::pointer conn)
 {
-	static comutex mutex;
-	static int g_int = 0;
-	LOG_INFO << g_int;
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 11;
-			LOG_INFO << "static var is modified to 11";
-	   });
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 22;
-			LOG_INFO << "static var is modified to 22";
-	   });
-
+	while (true)
+	{
+		auto result = conn->recv();
+		errcode& err = result.first;
+		slice msg = result.second;
+		if (!msg.empty())
+		{
+			conn->send(msg);
+		}
+		if (err.code() != errcode::kOK)
+		{
+			LOG_DEBUG << "eof";
+			return;
+		}
+	}
 }
 
-void mutex_main()
+void echo_server()
+{
+	acceptor::pointer t_acceptor = acceptor::create(23333);
+	while (true)
+	{
+		tcpconn::pointer conn = t_acceptor->accept();
+		if (conn)
+		{
+			go(handle_conn, conn);
+		}
+	}
+}
+
+int echo_main()
 {
 	runtime* t_runtime = runtime::instance();
+
+	// set core numbers
 	t_runtime->set_max_procs(3);
-	t_runtime->start(example_mutex);
+
+	// start
+	t_runtime->start(echo_server);
+	return 0;
 }
