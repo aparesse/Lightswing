@@ -40,7 +40,7 @@ class runtime
 public:
 	friend class threadcontext;
 	friend class goroutine;
-	friend void yield();
+	friend void coroutine_yield();
 
 public:
 	runtime();
