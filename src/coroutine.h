@@ -47,6 +47,7 @@ public:
 
 	friend class schedule;
 	friend class threadcontext;
+	// declared in threadcontext.h
 	friend void e_run(uint32_t low32, uint32_t hi32);
 	typedef std::shared_ptr<coroutine> pointer;
 	typedef std::weak_ptr<coroutine> weakpointer;
@@ -78,7 +79,7 @@ private:
 	int id_;
 	schedule* schedule_;
 };
-void mainfunc(uint32_t low32, uint32_t hi32);
+
 const int kSTACK_MAX_SIZE = 4 * 1024;
 
 } // namespace lightswing

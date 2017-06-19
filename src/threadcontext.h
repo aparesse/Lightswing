@@ -51,6 +51,8 @@ private:
 	coroutine::weakpointer running_coroutine_;
 };
 
+void e_run(uint32_t low32, uint32_t hi32);
+
 } // namespace lightswing
 
 
