@@ -44,10 +44,10 @@ void eventloop::loop(std::size_t interval)
 	active_events_.clear();
 	poller_->wait(&active_events_, interval);
 	std::for_each(active_events_.begin(), active_events_.end(),
-				[](epollevent* event)
-				{
+				  [] (epollevent* event)
+				  {
 					event->handle_event();
-				});
+				  });
 }
 
 std::size_t eventloop::epollevent_nums() const

@@ -31,7 +31,7 @@
 
 namespace lightswing
 {
-class thread_context;
+class threadcontext;
 class schedule;
 class coroutine : public std::enable_shared_from_this<coroutine>
 {
