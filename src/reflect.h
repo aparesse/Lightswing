@@ -34,73 +34,73 @@ namespace lightswing
 class reflect
 {
 public:
-	reflect();
+    reflect();
 
-	static reflect* instance();
+    static reflect* instance();
 
-	template<typename T>
-	void set(const std::string& name, T* value);
+    template<typename T>
+    void set(const std::string& name, T* value);
 
-	any get(const std::string& name) const;
-
-private:
-	reflect& operator=(const reflect&) = delete;
-	reflect(const reflect&) = delete;
+    any get(const std::string& name) const;
 
 private:
-	std::map<std::string, any> objects_;
+    reflect& operator=(const reflect&) = delete;
+    reflect(const reflect&) = delete;
+
+private:
+    std::map<std::string, any> objects_;
 };
 
 inline reflect::reflect() :
-	objects_()
+    objects_()
 {
 }
 
 reflect* reflect::instance()
 {
-	return singleton<reflect>::instance();
+    return singleton<reflect>::instance();
 }
 
 inline any reflect::get(const std::string& name) const
 {
-	auto iter = objects_.find(name);
-	if (iter == objects_.end())
-	  return any();
-	return iter->second;
+    auto iter = objects_.find(name);
+    if (iter == objects_.end())
+      return any();
+    return iter->second;
 }
 
 template<typename T>
 inline void reflect::set(const std::string& name, T* value)
 {
-	objects_[name] = value;
+    objects_[name] = value;
 }
 
 inline any get_reflect(const std::string& name)
 {
-	reflect* refl = reflect::instance();
-	return refl->get(name);
+    reflect* refl = reflect::instance();
+    return refl->get(name);
 }
 
 template<typename T>
 inline int get_reflect(const std::string& name, T** result)
 {
-	assert(result);
-	assert(*result);
-	any obj = get_reflect(name);
-	if (typeid(T*) == obj.type())
-	{
-		T* pointer = any_cast<T*>(obj);
-		*result = pointer;
-		return 0;
-	}
-	return -1;
+    assert(result);
+    assert(*result);
+    any obj = get_reflect(name);
+    if (typeid(T*) == obj.type())
+    {
+        T* pointer = any_cast<T*>(obj);
+        *result = pointer;
+        return 0;
+    }
+    return -1;
 }
 
 #define REG_REFLECT(s)                                      \
 do                                                          \
 {                                                           \
-	reflect* t_reflect = reflect::intance();                \
-	t_reflect->set(#s, &s);                                 \
+    reflect* t_reflect = reflect::intance();                \
+    t_reflect->set(#s, &s);                                 \
 }                                                           \
 while (0)                                                    \
 

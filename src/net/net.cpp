@@ -26,24 +26,24 @@ namespace lightswing
 {
 void set_non_blocking(int sockfd)
 {
-	int opts;
-	opts = ::fcntl(sockfd, F_GETFL);
-	if (opts < 0)
-	{
-		return;
-	}
+    int opts;
+    opts = ::fcntl(sockfd, F_GETFL);
+    if (opts < 0)
+    {
+        return;
+    }
 
-	opts = opts | O_NONBLOCK;
-	if (::fcntl(sockfd, F_SETFL, opts) < 0)
-	{
-		return;
-	}
+    opts = opts | O_NONBLOCK;
+    if (::fcntl(sockfd, F_SETFL, opts) < 0)
+    {
+        return;
+    }
 }
 
 int create_non_blocking_socket()
 {
-	int sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
-	set_non_blocking(sockfd);
-	return sockfd;
+    int sockfd = ::socket(AF_INET, SOCK_STREAM, 0);
+    set_non_blocking(sockfd);
+    return sockfd;
 }
 }

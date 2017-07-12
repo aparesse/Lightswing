@@ -35,75 +35,75 @@ template<class T, class Compare = std::less<T>>
 class blockingset
 {
 public:
-	blockingset(std::size_t size) :
-		set_(),
-		mutex_(),
-		cond_(),
-		max_size_(size)
-	{
-	}
+    blockingset(std::size_t size) :
+        set_(),
+        mutex_(),
+        cond_(),
+        max_size_(size)
+    {
+    }
 
-	blockingset() :
-		set_(),
-		mutex_(),
-		cond_(),
-		max_size_(kDEFAULT_BLKSET_SIZE)
-	{
-	}
+    blockingset() :
+        set_(),
+        mutex_(),
+        cond_(),
+        max_size_(kDEFAULT_BLKSET_SIZE)
+    {
+    }
 
-	int insert(T elem) 
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		if (set_.size() >= max_size_)
-		  return -1;
-		set_.insert(std::move(elem));
-		cond_.notify_one();
-		return 0;
-	}
+    int insert(T elem) 
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (set_.size() >= max_size_)
+          return -1;
+        set_.insert(std::move(elem));
+        cond_.notify_one();
+        return 0;
+    }
 
-	bool empty() const 
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		return set_.empty();
-	}
+    bool empty() const 
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return set_.empty();
+    }
 
-	int count(const T& value)
-	{
-		std::unique_lock<std::mutex> lock(mutex_);
-		cond_.wait(lock, [this] { return !set_.empty(); });
-		return set_.count(value);
-	}
+    int count(const T& value)
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        cond_.wait(lock, [this] { return !set_.empty(); });
+        return set_.count(value);
+    }
 
-	int erase(const T& value)
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		auto iter = set_.find(value);
-		if (iter == set_.end())
-		{
-			return -1;
-		}
-		else
-		{
-			set_.erase(iter);
-			return 0;
-		}
-	}
+    int erase(const T& value)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto iter = set_.find(value);
+        if (iter == set_.end())
+        {
+            return -1;
+        }
+        else
+        {
+            set_.erase(iter);
+            return 0;
+        }
+    }
 
-	std::size_t size() const
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		return set_.size();
-	}
-
-private:
-	blockingset(const blockingset& other) = delete;
-	blockingset& operator=(const blockingset& other) = delete;
+    std::size_t size() const
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return set_.size();
+    }
 
 private:
-	std::set<T, Compare> set_;
-	mutable std::mutex mutex_;
-	std::condition_variable cond_;
-	std::size_t max_size_;
+    blockingset(const blockingset& other) = delete;
+    blockingset& operator=(const blockingset& other) = delete;
+
+private:
+    std::set<T, Compare> set_;
+    mutable std::mutex mutex_;
+    std::condition_variable cond_;
+    std::size_t max_size_;
 
 };
 

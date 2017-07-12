@@ -36,66 +36,66 @@ template<class T>
 class coqueue
 {
 public:
-	coqueue(std::size_t size) :
-		queue_(),
-		comutex_(),
-		max_size_(size)
-	{
-	}
+    coqueue(std::size_t size) :
+        queue_(),
+        comutex_(),
+        max_size_(size)
+    {
+    }
 
-	coqueue() :
-		queue_(),
-		comutex_(),
-		max_size_(kDEFAULT_BLKQUEUE_SIZE)
-	{
-	}
+    coqueue() :
+        queue_(),
+        comutex_(),
+        max_size_(kDEFAULT_BLKQUEUE_SIZE)
+    {
+    }
 
-	int push(T elem)
-	{
-		mutexguard lock(comutex_);
-		if (queue_.size() >= max_size_)
-		{
-			return -1;
-		}
-		queue_.push(std::move(elem));
-		return 0;
-	}
+    int push(T elem)
+    {
+        mutexguard lock(comutex_);
+        if (queue_.size() >= max_size_)
+        {
+            return -1;
+        }
+        queue_.push(std::move(elem));
+        return 0;
+    }
 
-	T pop()
-	{
-		comutex_.lock();
-		while (queue_.empty()) 
-		{
-			comutex_.unlock();
-			coroutine_yield();
-			comutex_.lock();
-		}
+    T pop()
+    {
+        comutex_.lock();
+        while (queue_.empty()) 
+        {
+            comutex_.unlock();
+            coroutine_yield();
+            comutex_.lock();
+        }
 
-		T value = std::move(queue_.front());
-		queue_.pop();
-		comutex_.unlock();
-		return value;
-	}
+        T value = std::move(queue_.front());
+        queue_.pop();
+        comutex_.unlock();
+        return value;
+    }
 
-	bool empty() const
-	{
-		mutexguard lock(comutex_);
-		return queue_.empty();
-	}
+    bool empty() const
+    {
+        mutexguard lock(comutex_);
+        return queue_.empty();
+    }
 
-	std::size_t size() const
-	{
-		mutexguard lock(comutex_);
-		return queue_.size();
-	}
+    std::size_t size() const
+    {
+        mutexguard lock(comutex_);
+        return queue_.size();
+    }
 private:
-	coqueue(const coqueue& other) = delete;
-	coqueue& operator=(const coqueue& ohter) = delete;
+    coqueue(const coqueue& other) = delete;
+    coqueue& operator=(const coqueue& ohter) = delete;
 
 private:
-	std::queue<T> queue_;
-	mutable comutex comutex_;
-	std::size_t max_size_;
+    std::queue<T> queue_;
+    mutable comutex comutex_;
+    std::size_t max_size_;
 };
 
 } //namespace lightswing

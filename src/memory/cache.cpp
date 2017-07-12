@@ -25,38 +25,38 @@
 namespace lightswing
 {
 cache::cache() :
-	freelists_(central::kBIG_OBJECT_BYTES / central::kBYTE_ALIGN)
+    freelists_(central::kBIG_OBJECT_BYTES / central::kBYTE_ALIGN)
 {
 }
 
 void cache::deallocate(void* p, std::size_t size)
 {
-	std::size_t index = central::index(size);
-	memorylist& mlist = freelists_[index];
-	mlist.push_back((char*)p);
+    std::size_t index = central::index(size);
+    memorylist& mlist = freelists_[index];
+    mlist.push_back((char*)p);
 }
 
 void* cache::allocate(std::size_t size)
 {
-	std::size_t index = central::index(size);
-	memorylist& mlist = freelists_[index];
-	if (mlist.empty())
-	{
-		return nullptr;
-	}
-	void* result = (void*)mlist.back();
-	mlist.pop_back();
-	return result;
+    std::size_t index = central::index(size);
+    memorylist& mlist = freelists_[index];
+    if (mlist.empty())
+    {
+        return nullptr;
+    }
+    void* result = (void*)mlist.back();
+    mlist.pop_back();
+    return result;
 }
 
 void cache::expansion(const memorylist& ptrs, std::size_t level)
 {
-	assert(level < freelists_.size());
-	memorylist& mlist = freelists_[level];
-	for (auto ptr : ptrs)
-	{
-		mlist.push_back(ptr);
-	}
+    assert(level < freelists_.size());
+    memorylist& mlist = freelists_[level];
+    for (auto ptr : ptrs)
+    {
+        mlist.push_back(ptr);
+    }
 }
 
 

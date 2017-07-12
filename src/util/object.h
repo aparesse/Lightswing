@@ -33,31 +33,31 @@ class object
 {
 
 public:
-	template<class... Arg>
-	object(Arg&&... arg);
+    template<class... Arg>
+    object(Arg&&... arg);
 
-	T& get() { return *ptr_; }
+    T& get() { return *ptr_; }
 
-	const T& get() const { return *ptr_; }
+    const T& get() const { return *ptr_; }
 
-	object<T> clone() const 
-	{
-		T* copy = ptr_->clone();
-		object<T> obj{__cloneconstruct(), copy};
-		return obj;
-	}
+    object<T> clone() const 
+    {
+        T* copy = ptr_->clone();
+        object<T> obj{__cloneconstruct(), copy};
+        return obj;
+    }
 
 private:
-	struct __cloneconstruct{};
-	object(__cloneconstruct copy, T* ptr) : ptr_(ptr) {}
-	std::shared_ptr<T> ptr_;
+    struct __cloneconstruct{};
+    object(__cloneconstruct copy, T* ptr) : ptr_(ptr) {}
+    std::shared_ptr<T> ptr_;
 
 };
 
 template<class T>
 template<class... Arg>
 inline object<T>::object(Arg&&... arg) :
-	ptr_(std::make_shared<T>(std::forward<Arg>(arg)...))
+    ptr_(std::make_shared<T>(std::forward<Arg>(arg)...))
 {
 }
 

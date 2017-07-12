@@ -35,39 +35,39 @@ class epollevent;
 class poller
 {
 public:
-	poller();
-	~poller();
+    poller();
+    ~poller();
 
-	std::size_t epoll_event_nums() const { return events_map_.size(); }
+    std::size_t epoll_event_nums() const { return events_map_.size(); }
 
-	void add_event(epollevent*);
-	void delete_event(epollevent*);
-	void update_event(epollevent*);
+    void add_event(epollevent*);
+    void delete_event(epollevent*);
+    void update_event(epollevent*);
 
-	int wait(std::vector<epollevent*>* active_events, int interval);
+    int wait(std::vector<epollevent*>* active_events, int interval);
 
-	void set_interval(int interval) { interval_ = interval; }
-
-private:
-	void ctl(int fd, uint32_t events, int op);
-	void add(int fd, uint32_t events);
-	void del(int fd, uint32_t events);
-	void mod(int fd, uint32_t events);
-
-	epoll_event& get_event(std::size_t i);
+    void set_interval(int interval) { interval_ = interval; }
 
 private:
-	// noncopyable
-	poller& operator=(const poller&) = delete;
-	poller(const poller&) = delete;
+    void ctl(int fd, uint32_t events, int op);
+    void add(int fd, uint32_t events);
+    void del(int fd, uint32_t events);
+    void mod(int fd, uint32_t events);
+
+    epoll_event& get_event(std::size_t i);
 
 private:
-	mutable std::mutex mutex_;
-	int epoll_socket_;
+    // noncopyable
+    poller& operator=(const poller&) = delete;
+    poller(const poller&) = delete;
 
-	std::vector<epoll_event> events_;
-	std::map<int, epollevent*> events_map_;
-	int interval_;
+private:
+    mutable std::mutex mutex_;
+    int epoll_socket_;
+
+    std::vector<epoll_event> events_;
+    std::map<int, epollevent*> events_map_;
+    int interval_;
 };
 } // namespace lightswing
 

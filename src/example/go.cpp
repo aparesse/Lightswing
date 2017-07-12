@@ -26,27 +26,27 @@ using namespace lightswing;
 
 void go_func(int a, int b, int c)
 {
-	LOG_INFO << "a: " << a << ", b: " << b << ", c: " << c;
+    LOG_INFO << "a: " << a << ", b: " << b << ", c: " << c;
 }
 
 void example_go()
 {
-	// go-coroutine supports variable arguments
-	go([] ()
-	   {
-			for (int i = 0; i < 10; ++i)
-			{
-				LOG_INFO << "hello: " << i;
-				
-				coroutine_yield();
-			}
-	   });
+    // go-coroutine supports variable arguments
+    go([] ()
+       {
+            for (int i = 0; i < 10; ++i)
+            {
+                LOG_INFO << "hello: " << i;
+                
+                coroutine_yield();
+            }
+       });
 }
 
 int go_main()
 {
-	runtime* t_runtime = runtime::instance();
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_go);
-	return 0;
+    runtime* t_runtime = runtime::instance();
+    t_runtime->set_max_procs(3);
+    t_runtime->start(example_go);
+    return 0;
 }

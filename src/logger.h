@@ -32,23 +32,23 @@ namespace lightswing
 class simple_debug_printer
 {
 public:
-	simple_debug_printer() :
-		ss_()
-	{
-	}
+    simple_debug_printer() :
+        ss_()
+    {
+    }
 
-	~simple_debug_printer()
-	{
-		std::cout << ss_.str() << std::endl;
-	}
+    ~simple_debug_printer()
+    {
+        std::cout << ss_.str() << std::endl;
+    }
 
-	std::stringstream& stream()
-	{
-		return ss_;
-	}
+    std::stringstream& stream()
+    {
+        return ss_;
+    }
 
 private:
-	std::stringstream ss_;
+    std::stringstream ss_;
 };
 
 #define LOG_DEBUG simple_debug_printer().stream() << "[LOG_DEBUG]"  \

@@ -26,44 +26,44 @@ using namespace lightswing;
 
 void handle_conn(tcpconn::pointer conn)
 {
-	while (true)
-	{
-		auto result = conn->recv();
-		errcode& err = result.first;
-		slice msg = result.second;
-		if (!msg.empty())
-		{
-			conn->send(msg);
-		}
-		if (err.code() != errcode::kOK)
-		{
-			LOG_DEBUG << "eof";
-			return;
-		}
-	}
+    while (true)
+    {
+        auto result = conn->recv();
+        errcode& err = result.first;
+        slice msg = result.second;
+        if (!msg.empty())
+        {
+            conn->send(msg);
+        }
+        if (err.code() != errcode::kOK)
+        {
+            LOG_DEBUG << "eof";
+            return;
+        }
+    }
 }
 
 void echo_server()
 {
-	acceptor::pointer t_acceptor = acceptor::create(23333);
-	while (true)
-	{
-		tcpconn::pointer conn = t_acceptor->accept();
-		if (conn)
-		{
-			go(handle_conn, conn);
-		}
-	}
+    acceptor::pointer t_acceptor = acceptor::create(23333);
+    while (true)
+    {
+        tcpconn::pointer conn = t_acceptor->accept();
+        if (conn)
+        {
+            go(handle_conn, conn);
+        }
+    }
 }
 
 int echo_main()
 {
-	runtime* t_runtime = runtime::instance();
+    runtime* t_runtime = runtime::instance();
 
-	// set core numbers
-	t_runtime->set_max_procs(3);
+    // set core numbers
+    t_runtime->set_max_procs(3);
 
-	// start
-	t_runtime->start(echo_server);
-	return 0;
+    // start
+    t_runtime->start(echo_server);
+    return 0;
 }

@@ -32,68 +32,68 @@ template<class T>
 class allocation
 {
 public:
-	static T* allocate();
-	static T* allocate(std::size_t n);
-	static void deallocate(T* ptr);
-	static void deallocate(T* ptr, std::size_t n);
-	static void construct(T* ptr);
-	static void construct(T* ptr, const T& value);
-	static void destroy(T* ptr);
-	static void destroy(T* first, T* last);
+    static T* allocate();
+    static T* allocate(std::size_t n);
+    static void deallocate(T* ptr);
+    static void deallocate(T* ptr, std::size_t n);
+    static void construct(T* ptr);
+    static void construct(T* ptr, const T& value);
+    static void destroy(T* ptr);
+    static void destroy(T* first, T* last);
 
 };
 
 template<typename T>
 inline T* allocation<T>::allocate()
 {
-	return allocate(1);
+    return allocate(1);
 }
 
 template<typename T>
 inline T* allocation<T>::allocate(std::size_t n)
 {
-	memorypool* pool = memorypool::instance();
-	return (T*)pool->allocate(sizeof(T) * n);
+    memorypool* pool = memorypool::instance();
+    return (T*)pool->allocate(sizeof(T) * n);
 }
 
 template<typename T>
 inline void allocation<T>::deallocate(T* ptr)
 {
-	deallocate(ptr, 1);
+    deallocate(ptr, 1);
 }
 
 template<typename T>
 inline void allocation<T>::deallocate(T* ptr, std::size_t n)
 {
-	memorypool* pool = memorypool::instance();
-	pool->deallocate(ptr, sizeof(T) * n);
+    memorypool* pool = memorypool::instance();
+    pool->deallocate(ptr, sizeof(T) * n);
 }
 
 template<typename T>
 inline void allocation<T>::construct(T* ptr)
 {
-	::new ((void*)ptr) T();
+    ::new ((void*)ptr) T();
 }
 
 template<typename T>
 inline void allocation<T>::construct(T* ptr, const T& value)
 {
-	::new ((void*)ptr) T(value);
+    ::new ((void*)ptr) T(value);
 }
 
 template<typename T>
 inline void allocation<T>::destroy(T* ptr)
 {
-	ptr->~T();
+    ptr->~T();
 }
 
 template<typename T>
 inline void allocation<T>::destroy(T* first, T* last)
 {
-	for ( ; first != last; ++first)
-	{
-		first->~T();
-	}
+    for ( ; first != last; ++first)
+    {
+        first->~T();
+    }
 }
 
 } // namespace lightswing

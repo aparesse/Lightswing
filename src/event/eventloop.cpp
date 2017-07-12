@@ -29,8 +29,8 @@ namespace lightswing
 {
 
 eventloop::eventloop() :
-	active_events_(),
-	poller_(std::make_shared<poller>())
+    active_events_(),
+    poller_(std::make_shared<poller>())
 {
 }
 
@@ -41,33 +41,33 @@ eventloop::~eventloop()
 
 void eventloop::loop(std::size_t interval)
 {
-	active_events_.clear();
-	poller_->wait(&active_events_, interval);
-	std::for_each(active_events_.begin(), active_events_.end(),
-				  [] (epollevent* event)
-				  {
-					event->handle_event();
-				  });
+    active_events_.clear();
+    poller_->wait(&active_events_, interval);
+    std::for_each(active_events_.begin(), active_events_.end(),
+                  [] (epollevent* event)
+                  {
+                    event->handle_event();
+                  });
 }
 
 std::size_t eventloop::epollevent_nums() const
 {
-	return poller_->epoll_event_nums();
+    return poller_->epoll_event_nums();
 }
 
 void eventloop::add_event(epollevent* event)
 {
-	poller_->add_event(event);
+    poller_->add_event(event);
 }
 
 void eventloop::delete_event(epollevent* event)
 {
-	poller_->delete_event(event);
+    poller_->delete_event(event);
 }
 
 void eventloop::update_event(epollevent* event)
 {
-	poller_->update_event(event);
+    poller_->update_event(event);
 }
 
 } // namespace lightswing

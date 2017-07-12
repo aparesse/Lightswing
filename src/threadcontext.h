@@ -32,23 +32,23 @@ class threadpool;
 
 class threadcontext
 {
-	friend void e_run(uint32_t low32, uint32_t hi32);
-	friend class coroutine;
+    friend void e_run(uint32_t low32, uint32_t hi32);
+    friend class coroutine;
 
 public:
-	threadcontext(int id, threadpool* pool);
-	void start();
-	coroutine::pointer running_coroutine();
-	int id() const;
+    threadcontext(int id, threadpool* pool);
+    void start();
+    coroutine::pointer running_coroutine();
+    int id() const;
 
 private:
-	void resume(coroutine::pointer co);
+    void resume(coroutine::pointer co);
 
 private:
-	int id_;
-	threadpool* pool_;
-	ucontext ctx_;
-	coroutine::weakpointer running_coroutine_;
+    int id_;
+    threadpool* pool_;
+    ucontext ctx_;
+    coroutine::weakpointer running_coroutine_;
 };
 
 void e_run(uint32_t low32, uint32_t hi32);

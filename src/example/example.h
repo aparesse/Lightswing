@@ -39,7 +39,7 @@ void echo_main();
 
 inline void do_example()
 {
-	echo_main();
+    echo_main();
 }
 
 #endif // EXAMPLE_H

@@ -30,78 +30,78 @@ namespace lightswing
 
 memorypool* memorypool::instance()
 {
-	return singleton<memorypool>::instance();
+    return singleton<memorypool>::instance();
 }
 
 memorypool::memorypool() :
-	centrals_(),
-	caches_()
+    centrals_(),
+    caches_()
 {
 }
 
 void memorypool::init(std::size_t size)
 {
-	int n = central::kBIG_OBJECT_BYTES / central::kBYTE_ALIGN;
-	centrals_ = std::vector<central>(size);
-	for (int i = 0; i < n; ++i)
-	{
-		centrals_.at(i).init(i);
-	}
-	caches_.resize(size);
+    int n = central::kBIG_OBJECT_BYTES / central::kBYTE_ALIGN;
+    centrals_ = std::vector<central>(size);
+    for (int i = 0; i < n; ++i)
+    {
+        centrals_.at(i).init(i);
+    }
+    caches_.resize(size);
 }
 
 void* memorypool::allocate(std::size_t size)
 {
-	if (size > central::kBIG_OBJECT_BYTES)
-	{
-		return ::malloc(size);
-	}
+    if (size > central::kBIG_OBJECT_BYTES)
+    {
+        return ::malloc(size);
+    }
 
-	int id = runtime::instance()->get_thread_id();
-	if (id == -1)
-	{
-		LOG_DEBUG << "mustn't malloc memory in non-coroutine thread";
-		assert(id != -1);
-	}
-	cache& t_cache = caches_[id];
-	void* result = t_cache.allocate(size);
-	if (!result)
-	{
-		std::size_t level = central::index(size);
-		central& t_central = centrals_[level];
-		auto vec = t_central.allocate(central::kALLOC_BYTES / t_central.central_size());
-		t_cache.expansion(vec, level);
-		result = t_cache.allocate(size);
-	}
-	return result;
+    int id = runtime::instance()->get_thread_id();
+    if (id == -1)
+    {
+        LOG_DEBUG << "mustn't malloc memory in non-coroutine thread";
+        assert(id != -1);
+    }
+    cache& t_cache = caches_[id];
+    void* result = t_cache.allocate(size);
+    if (!result)
+    {
+        std::size_t level = central::index(size);
+        central& t_central = centrals_[level];
+        auto vec = t_central.allocate(central::kALLOC_BYTES / t_central.central_size());
+        t_cache.expansion(vec, level);
+        result = t_cache.allocate(size);
+    }
+    return result;
 }
 
 void memorypool::deallocate(void* addr, std::size_t len)
 {
-	if (len > central::kBIG_OBJECT_BYTES)
-	{
-		return ::free(addr);
-	}
+    if (len > central::kBIG_OBJECT_BYTES)
+    {
+        return ::free(addr);
+    }
 
-	int id = runtime::instance()->get_thread_id();
-	if (id == -1)
-	{
-		LOG_DEBUG << "mustn't free memory in non-coroutine thread";
-		assert(id != -1);
-	}
-	cache& t_cache = caches_[id];
-	len = central::round_up(len);
-	t_cache.deallocate(addr, len);
+    int id = runtime::instance()->get_thread_id();
+    if (id == -1)
+    {
+        LOG_DEBUG << "mustn't free memory in non-coroutine thread";
+        assert(id != -1);
+    }
+    cache& t_cache = caches_[id];
+    len = central::round_up(len);
+    t_cache.deallocate(addr, len);
 }
 
 void* memorypool::ajust(std::size_t size)
 {
-	return nullptr;
+    return nullptr;
 }
 
 std::size_t memorypool::free_size() const
 {
-	return 0;
+    return 0;
 }
 
 } // namespace lightswing

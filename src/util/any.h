@@ -32,9 +32,9 @@ namespace lightswing
 class __anyplaceholder
 {
 public:
-	virtual ~__anyplaceholder() {}
-	virtual __anyplaceholder* clone() const { return nullptr; }
-	virtual const std::type_info& type() const { return typeid(void); }
+    virtual ~__anyplaceholder() {}
+    virtual __anyplaceholder* clone() const { return nullptr; }
+    virtual const std::type_info& type() const { return typeid(void); }
 
 };
 
@@ -42,67 +42,67 @@ template<class T>
 class __anyholder : public __anyplaceholder 
 {
 public:
-	__anyholder(const T& value) : value_(value) {}
-	virtual ~__anyholder() {}
-	virtual __anyplaceholder* clone() const { return new __anyholder<T>(value_); }
-	virtual const std::type_info& type() const { return typeid(T); }
+    __anyholder(const T& value) : value_(value) {}
+    virtual ~__anyholder() {}
+    virtual __anyplaceholder* clone() const { return new __anyholder<T>(value_); }
+    virtual const std::type_info& type() const { return typeid(T); }
 
-	T value_;
+    T value_;
 };
 
 class any
 {
 public:
-	any() : holder_(nullptr) {}
-	any(const any& other) :
-		holder_(other.holder_ ? other.holder_->clone(): nullptr)
-	{
-	}
+    any() : holder_(nullptr) {}
+    any(const any& other) :
+        holder_(other.holder_ ? other.holder_->clone(): nullptr)
+    {
+    }
 
-	any& operator=(const any& other) 
-	{
-		holder_ = other.holder_ ? other.holder_->clone() : nullptr;
-		return *this;
-	}
+    any& operator=(const any& other) 
+    {
+        holder_ = other.holder_ ? other.holder_->clone() : nullptr;
+        return *this;
+    }
 
-	template<typename T>
-	any(const T& value) : 
-		holder_(new __anyholder<T>(value))
-	{
-	}
+    template<typename T>
+    any(const T& value) : 
+        holder_(new __anyholder<T>(value))
+    {
+    }
 
-	any(any&& other)
-	{
-		holder_ = other.holder_;
-		other.holder_ = nullptr;
-	}
+    any(any&& other)
+    {
+        holder_ = other.holder_;
+        other.holder_ = nullptr;
+    }
 
-	~any()
-	{
-		if (holder_)
-		{
-			delete holder_;
-		}
-	}
+    ~any()
+    {
+        if (holder_)
+        {
+            delete holder_;
+        }
+    }
 
-	const std::type_info& type() const 
-	{
-		return holder_ ? holder_->type() : typeid(void);
-	}
+    const std::type_info& type() const 
+    {
+        return holder_ ? holder_->type() : typeid(void);
+    }
 
-	template<typename V>
-	friend  V any_cast(const any&);
+    template<typename V>
+    friend  V any_cast(const any&);
 
 private:
-	__anyplaceholder* holder_;
+    __anyplaceholder* holder_;
 };
 
 template<typename V>
 static V any_cast(const any& anyobj)
 {
-	assert(typeid(V) == anyobj.type());
-	__anyholder<V>* holder = dynamic_cast<__anyholder<V>*>(anyobj.holder_);
-	return holder->value_;
+    assert(typeid(V) == anyobj.type());
+    __anyholder<V>* holder = dynamic_cast<__anyholder<V>*>(anyobj.holder_);
+    return holder->value_;
 }
 
 } // namespace lightswing

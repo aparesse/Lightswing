@@ -26,54 +26,54 @@ using namespace lightswing;
 
 void example_chan()
 {
-	typedef typename chan<int>::pointer intchanpointer;
+    typedef typename chan<int>::pointer intchanpointer;
 
-	// chan can generate a brother, they can comunicate with each other
-	intchanpointer chan = make_chan<int>();
-	intchanpointer brother = chan->brother();
+    // chan can generate a brother, they can comunicate with each other
+    intchanpointer chan = make_chan<int>();
+    intchanpointer brother = chan->brother();
 
-	// start two coroutine to recv and send
-	go ([brother] () 
-		{
-			while (true)
-			{
-				int recv = 0;
-				int err = brother->recv(recv);
-				if (err < 0)
-				{
-					LOG_INFO << "brother is deconstructed, can't recv anything";
-					return;
-				}
-				LOG_INFO << "recv: " << recv;
-				if (recv == 3)
-				{
-					LOG_INFO << "quit";
-					return;
-				}
-			}
-		});
+    // start two coroutine to recv and send
+    go ([brother] () 
+        {
+            while (true)
+            {
+                int recv = 0;
+                int err = brother->recv(recv);
+                if (err < 0)
+                {
+                    LOG_INFO << "brother is deconstructed, can't recv anything";
+                    return;
+                }
+                LOG_INFO << "recv: " << recv;
+                if (recv == 3)
+                {
+                    LOG_INFO << "quit";
+                    return;
+                }
+            }
+        });
 
-	go ([chan] ()
-		{
-			for (int i = 0; i <= 5; ++i)
-			{
-				int err = chan->send(i);
-				if (err < 0)
-				{
-					LOG_INFO << "brother is deconstructed, can't send anything";
-					return;
-				}
-				// sleep
-				coroutine_sleep(3);
-			}
-		});
+    go ([chan] ()
+        {
+            for (int i = 0; i <= 5; ++i)
+            {
+                int err = chan->send(i);
+                if (err < 0)
+                {
+                    LOG_INFO << "brother is deconstructed, can't send anything";
+                    return;
+                }
+                // sleep
+                coroutine_sleep(3);
+            }
+        });
 }
 
 int chan_main()
 {
-	runtime* t_runtime= runtime::instance();
-	// set core numbers
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_chan);
-	return 0;
+    runtime* t_runtime= runtime::instance();
+    // set core numbers
+    t_runtime->set_max_procs(3);
+    t_runtime->start(example_chan);
+    return 0;
 }

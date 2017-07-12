@@ -32,70 +32,70 @@ namespace lightswing
 {
 struct __buffer
 {
-	__buffer() : data_(nullptr) {}
+    __buffer() : data_(nullptr) {}
 
-	__buffer(std::size_t size) : 
-		data_(new char[size])
-	{
-	}
+    __buffer(std::size_t size) : 
+        data_(new char[size])
+    {
+    }
 
-	~__buffer()
-	{
-		if (data_)
-		  delete[] data_;
-	}
-	char* data_;
+    ~__buffer()
+    {
+        if (data_)
+          delete[] data_;
+    }
+    char* data_;
 };
 
 class slice
 {
 public:
-	typedef const char* constiter;
-	friend slice make_slice(const char*);
-	static const std::size_t npos = std::string::npos;
+    typedef const char* constiter;
+    friend slice make_slice(const char*);
+    static const std::size_t npos = std::string::npos;
 
 public:
-	slice();
-	explicit slice(const char* buf);
-	slice(const char* buf, std::size_t size);
+    slice();
+    explicit slice(const char* buf);
+    slice(const char* buf, std::size_t size);
 
-	// clone and maintain itself
-	slice clone() const;
+    // clone and maintain itself
+    slice clone() const;
 
-	// reference to container's implementation
-	friend slice make_ref(const char* str, std::size_t len);
-	friend slice make_ref(const char* first, const char* last);
+    // reference to container's implementation
+    friend slice make_ref(const char* str, std::size_t len);
+    friend slice make_ref(const char* first, const char* last);
 
-	void clear();
-	bool empty() const;
-	char operator[](std::size_t pos) const;
-	char at(std::size_t pos) const;
+    void clear();
+    bool empty() const;
+    char operator[](std::size_t pos) const;
+    char at(std::size_t pos) const;
 
-	std::size_t size() const { return size_; }
-	std::size_t length() const { return size(); }
-	constiter begin() const { return start_; }
-	constiter end() const { return start_ + size_; }
-	constiter cbegin() const { return start_; }
-	constiter cend() const { return start_ + size_; }
+    std::size_t size() const { return size_; }
+    std::size_t length() const { return size(); }
+    constiter begin() const { return start_; }
+    constiter end() const { return start_ + size_; }
+    constiter cbegin() const { return start_; }
+    constiter cend() const { return start_ + size_; }
 
-	std::size_t find(const std::string& target, std::size_t pos = 0) const;
-	std::size_t find(const char* target, std::size_t len, std::size_t pos = 0) const;
+    std::size_t find(const std::string& target, std::size_t pos = 0) const;
+    std::size_t find(const char* target, std::size_t len, std::size_t pos = 0) const;
 
-	slice subslice(std::size_t pos, std::size_t len) const;
+    slice subslice(std::size_t pos, std::size_t len) const;
 
-	std::string to_string() const;
-	const char* data() const { return start_; }
+    std::string to_string() const;
+    const char* data() const { return start_; }
 
-	slice operator+(const slice& other);
-	friend std::ostream& operator<<(std::ostream&, const slice&);
-	friend bool operator==(const slice& s, const char* p);
-	friend bool operator==(const char* p, const slice& s);
+    slice operator+(const slice& other);
+    friend std::ostream& operator<<(std::ostream&, const slice&);
+    friend bool operator==(const slice& s, const char* p);
+    friend bool operator==(const char* p, const slice& s);
 
-	
+    
 private:
-	std::shared_ptr<__buffer> buf_;
-	const char* start_;
-	std::size_t size_;
+    std::shared_ptr<__buffer> buf_;
+    const char* start_;
+    std::size_t size_;
 };
 } // namespace lightswing
 

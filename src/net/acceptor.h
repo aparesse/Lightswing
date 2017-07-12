@@ -40,30 +40,30 @@ namespace lightswing
 class acceptor
 {
 public:
-	typedef std::shared_ptr<acceptor> pointer;
+    typedef std::shared_ptr<acceptor> pointer;
 
 public:
-	acceptor(int port);
-	~acceptor();
+    acceptor(int port);
+    ~acceptor();
 
-	static acceptor::pointer create(int port)
-	{
-		return std::make_shared<acceptor>(port);
-	}
+    static acceptor::pointer create(int port)
+    {
+        return std::make_shared<acceptor>(port);
+    }
 
-	tcpconn::pointer accept();
-
-private:
-	tcpconn::pointer do_accept(int fd);
-	void listen();
+    tcpconn::pointer accept();
 
 private:
-	std::atomic<bool> new_conn_flag_;
-	tcpconn::pointer new_conn_;
-	int port_;
-	int listenfd_;
-	eventloop* loop_;
-	epollevent::pointer ev_;
+    tcpconn::pointer do_accept(int fd);
+    void listen();
+
+private:
+    std::atomic<bool> new_conn_flag_;
+    tcpconn::pointer new_conn_;
+    int port_;
+    int listenfd_;
+    eventloop* loop_;
+    epollevent::pointer ev_;
 };
 
 } // namespace lightswing

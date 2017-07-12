@@ -38,58 +38,58 @@ namespace lightswing
 class runtime
 {
 public:
-	friend class threadcontext;
-	friend class goroutine;
-	friend void coroutine_yield();
+    friend class threadcontext;
+    friend class goroutine;
+    friend void coroutine_yield();
 
 public:
-	runtime();
-	~runtime();
+    runtime();
+    ~runtime();
 
-	static runtime* instance();
+    static runtime* instance();
 
-	void on_event(const std::string& ev, eventmanager::func fn);
-	void emit_event(const std::string& ev) const;
+    void on_event(const std::string& ev, eventmanager::func fn);
+    void emit_event(const std::string& ev) const;
 
-	coroutine::pointer new_coroutine(std::function<void()> fn);
-	void set_max_procs(std::size_t num);
-	std::size_t max_procs() const;
+    coroutine::pointer new_coroutine(std::function<void()> fn);
+    void set_max_procs(std::size_t num);
+    std::size_t max_procs() const;
 
-	template<typename...Arg>
-	void start(Arg&&... arg);
+    template<typename...Arg>
+    void start(Arg&&... arg);
 
-	void set_loop_interval(std::size_t interval);
+    void set_loop_interval(std::size_t interval);
 
-	eventmanager& event_manager();
+    eventmanager& event_manager();
 
-	int get_thread_id() const;
+    int get_thread_id() const;
 
-	void yield();
-
-private:
-	runtime& operator=(const runtime& other) = delete;
-	runtime(const runtime& other) = delete;
+    void yield();
 
 private:
-	std::size_t core_num_;
-	schedule schedule_;
-	threadpool threadpool_;
-	eventmanager event_manager_;
+    runtime& operator=(const runtime& other) = delete;
+    runtime(const runtime& other) = delete;
+
+private:
+    std::size_t core_num_;
+    schedule schedule_;
+    threadpool threadpool_;
+    eventmanager event_manager_;
 
 };
 
 template<typename... Arg>
 void runtime::start(Arg&&... arg)
 {
-	assert(!threadpool_.is_running());
-	schedule_.init(core_num_);
-	threadpool_.start(core_num_);
-	auto fn = std::bind(std::forward<Arg>(arg)...);
-	new_coroutine(fn);
-	while (!schedule_.empty())
-	{
-		event_manager_.loop();
-	}
+    assert(!threadpool_.is_running());
+    schedule_.init(core_num_);
+    threadpool_.start(core_num_);
+    auto fn = std::bind(std::forward<Arg>(arg)...);
+    new_coroutine(fn);
+    while (!schedule_.empty())
+    {
+        event_manager_.loop();
+    }
 }
 
 } // namespace lighswing

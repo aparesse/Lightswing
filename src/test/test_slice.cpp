@@ -28,11 +28,11 @@ namespace test
 
 void test_slice()
 {
-	lightswing::slice sli1("hello world");
-	lightswing::slice sli2("good morning");
-	lightswing::slice sli3 = sli1 + sli2;
-	DEBUG_INFO << sli3;
-	EXCEPT_EQ(sli3, "hello world good morning");
+    lightswing::slice sli1("hello world");
+    lightswing::slice sli2("good morning");
+    lightswing::slice sli3 = sli1 + sli2;
+    DEBUG_INFO << sli3;
+    EXCEPT_EQ(sli3, "hello world good morning");
 }
 
 } // namespace lightswing

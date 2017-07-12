@@ -33,33 +33,33 @@ namespace lightswing
 class central
 {
 public:
-	static const int kBYTE_ALIGN = 8;
-	static const int kBIG_OBJECT_BYTES = 64;
-	static const int kALLOC_BYTES = 4 * kBIG_OBJECT_BYTES;
-	typedef char* pointer;
+    static const int kBYTE_ALIGN = 8;
+    static const int kBIG_OBJECT_BYTES = 64;
+    static const int kALLOC_BYTES = 4 * kBIG_OBJECT_BYTES;
+    typedef char* pointer;
 
 public:
-	central();
-	void init(std::size_t size);
-	void deallocate(void* p);
-	void* allocate();
-	std::vector<pointer> allocate(std::size_t n);
-	bool empty() const;
-	std::size_t size() const;
+    central();
+    void init(std::size_t size);
+    void deallocate(void* p);
+    void* allocate();
+    std::vector<pointer> allocate(std::size_t n);
+    bool empty() const;
+    std::size_t size() const;
 
-	std::size_t central_size() const;
+    std::size_t central_size() const;
 
-	static std::size_t index(std::size_t bytes);
+    static std::size_t index(std::size_t bytes);
 
-	static std::size_t round_up(std::size_t bytes);
-
-private:
-	void __ajust_list(std::size_t n);
+    static std::size_t round_up(std::size_t bytes);
 
 private:
-	mutable std::mutex mutex_;
-	int level_;
-	std::list<pointer> list_;
+    void __ajust_list(std::size_t n);
+
+private:
+    mutable std::mutex mutex_;
+    int level_;
+    std::list<pointer> list_;
 };
 
 } // lightswing

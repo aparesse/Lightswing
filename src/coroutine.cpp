@@ -31,69 +31,69 @@ namespace lightswing
 {
 
 coroutine::coroutine() :
-	stack_(kSTACK_MAX_SIZE),
-	fn_(),
-	status_(eDEAD),
-	id_(-1)
+    stack_(kSTACK_MAX_SIZE),
+    fn_(),
+    status_(eDEAD),
+    id_(-1)
 {
-	
+    
 }
 
 void coroutine::yield()
 {
-	assert(status_ == coroutine::eRUNNING);
-	status_ = coroutine::eSUSPEND;
-	swapcontext(&ctx_, ctx_.uc_link);
+    assert(status_ == coroutine::eRUNNING);
+    status_ = coroutine::eSUSPEND;
+    swapcontext(&ctx_, ctx_.uc_link);
 }
 
 //void coroutine::resume()
 //{
-//	schedule_ = resume(shared_from_this());
+//  schedule_ = resume(shared_from_this());
 //}
 
 void coroutine::swap_context(ucontext* context)
 {
-	swapcontext(&ctx_, context);
+    swapcontext(&ctx_, context);
 }
 
 void coroutine::set_func(func fn)
 {
-	fn_ = std::move(fn);
+    fn_ = std::move(fn);
 }
 
 coroutine::pointer coroutine::create()
 {
-	return std::make_shared<coroutine>();
+    return std::make_shared<coroutine>();
 }
 
 ucontext_t* coroutine::context()
 {
-	return &ctx_;
+    return &ctx_;
 }
 
 std::size_t coroutine::stack_size() const
 {
-	return stack_.size();
+    return stack_.size();
 }
 
 coroutine::estatus coroutine::status() const
 {
-	return status_;
+    return status_;
 }
 
 void coroutine::set_status(coroutine::estatus status)
 {
-	status_ = status;
+    status_ = status;
 }
 
 char* coroutine::stack_top()
 {
-	return &*stack_.begin();
+    return &*stack_.begin();
 }
 
 void coroutine::save_stack()
 {
-	
+    
 }
 
 }

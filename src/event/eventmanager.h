@@ -34,65 +34,65 @@ namespace lightswing
 {
 struct eventfd
 {
-	typedef std::shared_ptr<eventfd> pointer;
-	static pointer create(int read_fd, int write_fd, eventloop* loop)
-	{
-		return std::make_shared<eventfd>(read_fd, write_fd, loop);
-	}
-	
-	eventfd(int read_fd, int write_fd, eventloop* loop) :
-		event_(loop, read_fd, EPOLLIN | EPOLLOUT | EPOLLRDHUP),
-		write_fd_(write_fd)
-	{
-		loop->add_event(&event_);
-	}
+    typedef std::shared_ptr<eventfd> pointer;
+    static pointer create(int read_fd, int write_fd, eventloop* loop)
+    {
+        return std::make_shared<eventfd>(read_fd, write_fd, loop);
+    }
+    
+    eventfd(int read_fd, int write_fd, eventloop* loop) :
+        event_(loop, read_fd, EPOLLIN | EPOLLOUT | EPOLLRDHUP),
+        write_fd_(write_fd)
+    {
+        loop->add_event(&event_);
+    }
 
-	~eventfd()
-	{
-		event_.loop()->delete_event(&event_);
-		::close(write_fd_);
-	}
+    ~eventfd()
+    {
+        event_.loop()->delete_event(&event_);
+        ::close(write_fd_);
+    }
 
-	epollevent event_;
-	int write_fd_;
+    epollevent event_;
+    int write_fd_;
 };
 
 
 class eventmanager
 {
 public:
-	static const int kWRITE_FD = 1;
-	static const int kREAD_FD = 0;
+    static const int kWRITE_FD = 1;
+    static const int kREAD_FD = 0;
 
-	typedef std::function<void()> func;
+    typedef std::function<void()> func;
 
 public:
-	eventmanager();
-	~eventmanager();
+    eventmanager();
+    ~eventmanager();
 
-	void loop();
-	eventloop* the_eventloop();
-	void set_interval(std::size_t interval);
-	void add_epoll_event(epollevent* ev);
-	void delete_epoll_event(epollevent* ev);
+    void loop();
+    eventloop* the_eventloop();
+    void set_interval(std::size_t interval);
+    void add_epoll_event(epollevent* ev);
+    void delete_epoll_event(epollevent* ev);
 
-	void register_event(const std::string& name, func fn);
-	void emit_event(const std::string& name) const;
-	void unregister_event(const std::string& name);
-
-private:
-	void handle_error(int fd);
-	void handle_close(int fd);
+    void register_event(const std::string& name, func fn);
+    void emit_event(const std::string& name) const;
+    void unregister_event(const std::string& name);
 
 private:
-	eventmanager(const eventmanager& other) = delete;
-	eventmanager& operator=(const eventmanager& other) = delete;
+    void handle_error(int fd);
+    void handle_close(int fd);
 
 private:
-	mutable std::mutex mutex_;
-	eventloop loop_;
-	std::map<std::string, eventfd::pointer> events_;
-	std::size_t loop_interval_;
+    eventmanager(const eventmanager& other) = delete;
+    eventmanager& operator=(const eventmanager& other) = delete;
+
+private:
+    mutable std::mutex mutex_;
+    eventloop loop_;
+    std::map<std::string, eventfd::pointer> events_;
+    std::size_t loop_interval_;
 };
 
 const std::size_t kDEFUALT_INTERVAL = 500;

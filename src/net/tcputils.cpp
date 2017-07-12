@@ -29,61 +29,61 @@ namespace lightswing
 std::pair<errcode, int>
 __send_some(int fd, const char* buf, std::size_t len)
 {
-	int nsend = 0, n = 0;
-	while (1)
-	{
-		n = ::write(fd, buf + nsend, len - nsend);
-		if (n <= 0)
-		{
-			if (errno == EAGAIN)
-			{
-				return std::make_pair(errcode(errcode::kOK, "eagain"), nsend);
-			}
-			else
-			{
-				return std::make_pair(errcode(errno), nsend);
-			}
-		}
-		nsend += n;
-		if (static_cast<std::size_t>(nsend) == len)
-		{
-			break;
-		}
-	}
-	return std::make_pair(errcode(errcode::kOK, "ok"), nsend);
+    int nsend = 0, n = 0;
+    while (1)
+    {
+        n = ::write(fd, buf + nsend, len - nsend);
+        if (n <= 0)
+        {
+            if (errno == EAGAIN)
+            {
+                return std::make_pair(errcode(errcode::kOK, "eagain"), nsend);
+            }
+            else
+            {
+                return std::make_pair(errcode(errno), nsend);
+            }
+        }
+        nsend += n;
+        if (static_cast<std::size_t>(nsend) == len)
+        {
+            break;
+        }
+    }
+    return std::make_pair(errcode(errcode::kOK, "ok"), nsend);
 }
 
 std::pair<errcode, int>
 __recv_some(int fd, char* buf, std::size_t len)
 {
-	int nread = 0, n = 0, buf_length = len;
-	while (1)
-	{
-		n = ::read(fd, buf + nread, buf_length - nread);
-		if (n <= 0)
-		{
-			if (n == 0)
-			{
-				return std::make_pair(errcode(errcode::kEOF, "eof"), nread);
-			}
+    int nread = 0, n = 0, buf_length = len;
+    while (1)
+    {
+        n = ::read(fd, buf + nread, buf_length - nread);
+        if (n <= 0)
+        {
+            if (n == 0)
+            {
+                return std::make_pair(errcode(errcode::kEOF, "eof"), nread);
+            }
 
-			if (errno == EAGAIN)
-			{
-				return std::make_pair(errcode(errcode::kOK, "eagain"), nread);
-			}
-			else
-			{
-				return std::make_pair(errcode(errno), nread);
-			}
-			break;
-		}
-		nread += n;
-		if (nread == buf_length)
-		{
-			break;
-		}
-	}
-	return std::make_pair(errcode(errcode::kOK, "ok"), nread);
+            if (errno == EAGAIN)
+            {
+                return std::make_pair(errcode(errcode::kOK, "eagain"), nread);
+            }
+            else
+            {
+                return std::make_pair(errcode(errno), nread);
+            }
+            break;
+        }
+        nread += n;
+        if (nread == buf_length)
+        {
+            break;
+        }
+    }
+    return std::make_pair(errcode(errcode::kOK, "ok"), nread);
 }
 
 } // namespace lightswing

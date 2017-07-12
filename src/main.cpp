@@ -30,7 +30,7 @@ using namespace lightswing;
 
 int main()
 {
-	do_example();
-	LOG_INFO << "hello world";
-	return 0;
+    do_example();
+    LOG_INFO << "hello world";
+    return 0;
 }

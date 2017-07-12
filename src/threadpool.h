@@ -37,57 +37,57 @@ namespace lightswing
 class threadpool
 {
 public:
-	typedef std::function<void()> func;
-	typedef std::map<std::thread::id, threadcontext*> threadmap;
+    typedef std::function<void()> func;
+    typedef std::map<std::thread::id, threadcontext*> threadmap;
 
 public:
-	threadpool();
-	void set_func(func fn);
-	void stop();
-	void start(std::size_t size);
-	std::size_t size() const;
-	bool is_running() const;
-	const threadmap& thread_map() const;
-	threadmap& thread_map();
+    threadpool();
+    void set_func(func fn);
+    void stop();
+    void start(std::size_t size);
+    std::size_t size() const;
+    bool is_running() const;
+    const threadmap& thread_map() const;
+    threadmap& thread_map();
 
 private:
-	threadpool& operator=(const threadpool&) = delete;
-	threadpool(const threadpool&) = delete;
+    threadpool& operator=(const threadpool&) = delete;
+    threadpool(const threadpool&) = delete;
 
 private:
-	std::size_t size_;
-	std::atomic_bool quit_;
-	func thread_loop_fn_;
-	std::vector<threadcontext> thread_context_;
-	threadmap thread_map_;
+    std::size_t size_;
+    std::atomic_bool quit_;
+    func thread_loop_fn_;
+    std::vector<threadcontext> thread_context_;
+    threadmap thread_map_;
 };
 
 const int kDEFAULT_THREAD_NUM = 0;
 
 inline threadpool::threadpool() :
-	size_(0),
-	quit_(true),
-	thread_loop_fn_(),
-	thread_context_(),
-	thread_map_()
+    size_(0),
+    quit_(true),
+    thread_loop_fn_(),
+    thread_context_(),
+    thread_map_()
 {
 
 }
 
 inline void threadpool::set_func(func fn)
 {
-	thread_loop_fn_ = fn;
+    thread_loop_fn_ = fn;
 }
 
 inline void threadpool::start(std::size_t size)
 {
-	quit_ = false;
-	thread_context_.reserve(size);
-	for (std::size_t i = 0; i < size; ++i)
-	  thread_context_.push_back(threadcontext(i, this));
+    quit_ = false;
+    thread_context_.reserve(size);
+    for (std::size_t i = 0; i < size; ++i)
+      thread_context_.push_back(threadcontext(i, this));
 
-	for(std::size_t i = 0; i < size; ++i)
-	  thread_context_[i].start();
+    for(std::size_t i = 0; i < size; ++i)
+      thread_context_[i].start();
 }
 
 inline void threadpool::stop()
@@ -97,22 +97,22 @@ inline void threadpool::stop()
 
 inline std::size_t threadpool::size() const
 {
-	return size_;
+    return size_;
 }
 
 inline bool threadpool::is_running() const
 {
-	return !quit_;
+    return !quit_;
 }
 
 inline const threadpool::threadmap& threadpool::thread_map() const 
 {
-	return thread_map_;
+    return thread_map_;
 }
 
 inline threadpool::threadmap& threadpool::thread_map()
 {
-	return thread_map_;
+    return thread_map_;
 }
 
 } // namespace lightswing

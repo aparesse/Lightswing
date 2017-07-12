@@ -36,48 +36,48 @@ class schedule;
 class coroutine : public std::enable_shared_from_this<coroutine>
 {
 public:
-	enum estatus
-	{
-		eDEAD,
-		eREADY,
-		eSUSPEND,
-		eRUNNING,
-		eSIZE
-	};
+    enum estatus
+    {
+        eDEAD,
+        eREADY,
+        eSUSPEND,
+        eRUNNING,
+        eSIZE
+    };
 
-	friend class schedule;
-	friend class threadcontext;
-	// declared in threadcontext.h
-	friend void e_run(uint32_t low32, uint32_t hi32);
-	typedef std::shared_ptr<coroutine> pointer;
-	typedef std::weak_ptr<coroutine> weakpointer;
-	typedef std::function<void(coroutine::pointer)> func;
+    friend class schedule;
+    friend class threadcontext;
+    // declared in threadcontext.h
+    friend void e_run(uint32_t low32, uint32_t hi32);
+    typedef std::shared_ptr<coroutine> pointer;
+    typedef std::weak_ptr<coroutine> weakpointer;
+    typedef std::function<void(coroutine::pointer)> func;
 
 public:
-	coroutine();
-	~coroutine() { LOG_INFO << "~coroutine"; }
-	int id() const { return this->id_; }
-	void yield();
-	void swap_context(ucontext* context);
-	void set_func(func fn);
-	static pointer create();
-	ucontext_t* context();
-	std::size_t stack_size() const;
+    coroutine();
+    ~coroutine() { LOG_INFO << "~coroutine"; }
+    int id() const { return this->id_; }
+    void yield();
+    void swap_context(ucontext* context);
+    void set_func(func fn);
+    static pointer create();
+    ucontext_t* context();
+    std::size_t stack_size() const;
 
-	estatus status() const;
-	void set_status(estatus status);
-
-private:
-	char* stack_top();
-	void save_stack();
+    estatus status() const;
+    void set_status(estatus status);
 
 private:
-	std::vector<char> stack_;
-	func fn_;
-	ucontext_t ctx_;
-	estatus status_;
-	int id_;
-	schedule* schedule_;
+    char* stack_top();
+    void save_stack();
+
+private:
+    std::vector<char> stack_;
+    func fn_;
+    ucontext_t ctx_;
+    estatus status_;
+    int id_;
+    schedule* schedule_;
 };
 
 const int kSTACK_MAX_SIZE = 4 * 1024;

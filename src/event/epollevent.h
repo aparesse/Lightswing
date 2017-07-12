@@ -34,65 +34,65 @@ class eventloop;
 class epollevent
 {
 public:
-	typedef std::function<void(int)> event_callback;
-	typedef std::shared_ptr<epollevent> pointer;
+    typedef std::function<void(int)> event_callback;
+    typedef std::shared_ptr<epollevent> pointer;
 
 public:
-	static pointer create(eventloop* loop, int fd, uint32_t events)
-	{
-		return std::make_shared<epollevent>(loop, fd, events);
-	}
+    static pointer create(eventloop* loop, int fd, uint32_t events)
+    {
+        return std::make_shared<epollevent>(loop, fd, events);
+    }
 
 public:
-	epollevent(eventloop* loop, int fd, uint32_t events);
-	~epollevent();
+    epollevent(eventloop* loop, int fd, uint32_t events);
+    ~epollevent();
 
 
-	void handle_event();
-	void set_read_callback(const event_callback& cb);
-	void set_write_callback(const event_callback& cb);
-	void set_error_callback(const event_callback& cb);
-	void set_close_callback(const event_callback& cb);
+    void handle_event();
+    void set_read_callback(const event_callback& cb);
+    void set_write_callback(const event_callback& cb);
+    void set_error_callback(const event_callback& cb);
+    void set_close_callback(const event_callback& cb);
 
-	int fd() const;
-	void set_fd(int fd);
+    int fd() const;
+    void set_fd(int fd);
 
-	// concerd about events
-	uint32_t events() const;
+    // concerd about events
+    uint32_t events() const;
 
-	// active events currently
-	void set_revents(uint32_t ev);
+    // active events currently
+    void set_revents(uint32_t ev);
 
-	void update();
-	void enable_reading() { events_ |= EPOLLIN; update(); }
-	void enbale_writing() { events_ |= EPOLLOUT; update(); }
-	void enable_closing() { events_ |= EPOLLRDHUP; update(); }
-	void enbale_error() {events_ |= EPOLLERR; update(); }
+    void update();
+    void enable_reading() { events_ |= EPOLLIN; update(); }
+    void enbale_writing() { events_ |= EPOLLOUT; update(); }
+    void enable_closing() { events_ |= EPOLLRDHUP; update(); }
+    void enbale_error() {events_ |= EPOLLERR; update(); }
 
-	void disable_reading() { events_ &= !EPOLLIN; update(); }
-	void disable_writing() { events_ &= !EPOLLOUT; update(); }
-	void disbale_closing() { events_ &= !EPOLLRDHUP; update(); }
-	void disbale_error() { events_ &= !EPOLLERR; update(); }
+    void disable_reading() { events_ &= !EPOLLIN; update(); }
+    void disable_writing() { events_ &= !EPOLLOUT; update(); }
+    void disbale_closing() { events_ &= !EPOLLRDHUP; update(); }
+    void disbale_error() { events_ &= !EPOLLERR; update(); }
 
-	void disable_all();
-	eventloop* loop() { return loop_; }
-
-private:
-	// noncopyable
-	epollevent(epollevent&&) = delete;
-	epollevent& operator=(const epollevent&) = delete;
-	epollevent(const epollevent&) = delete;
+    void disable_all();
+    eventloop* loop() { return loop_; }
 
 private:
-	eventloop* loop_;
-	int fd_;
-	uint32_t events_;
-	uint32_t revents_;
+    // noncopyable
+    epollevent(epollevent&&) = delete;
+    epollevent& operator=(const epollevent&) = delete;
+    epollevent(const epollevent&) = delete;
 
-	event_callback read_callback_;
-	event_callback write_callback_;
-	event_callback error_callback_;
-	event_callback close_callback_;
+private:
+    eventloop* loop_;
+    int fd_;
+    uint32_t events_;
+    uint32_t revents_;
+
+    event_callback read_callback_;
+    event_callback write_callback_;
+    event_callback error_callback_;
+    event_callback close_callback_;
 };
 
 } // namespace lightswing

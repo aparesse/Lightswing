@@ -32,35 +32,35 @@ namespace lightswing
 class errcode
 {
 public:
-	const static int kOK = -1;
-	const static int kERROR = -2;
-	const static int kEOF = -3;
+    const static int kOK = -1;
+    const static int kERROR = -2;
+    const static int kEOF = -3;
 
-	errcode(int code, std::string msg) :
-		code_(code),
-		msg_(std::move(msg))
-	{
-	}
+    errcode(int code, std::string msg) :
+        code_(code),
+        msg_(std::move(msg))
+    {
+    }
 
-	errcode(int code) :
-		code_(code),
-		msg_(::strerror(code))
-	{
-	}
+    errcode(int code) :
+        code_(code),
+        msg_(::strerror(code))
+    {
+    }
 
-	int code() const
-	{
-		return code_;
-	}
+    int code() const
+    {
+        return code_;
+    }
 
-	std::string msg() const
-	{
-		return msg_;
-	}
+    std::string msg() const
+    {
+        return msg_;
+    }
 
 private:
-	int code_;
-	std::string msg_;
+    int code_;
+    std::string msg_;
 
 };
 

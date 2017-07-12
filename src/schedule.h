@@ -34,36 +34,36 @@ const int kSTACK_SIZE = 4 * 1024;
 
 class schedule
 {
-	friend class coroutine;
+    friend class coroutine;
 public:
-	typedef coroutine::func func;
-	typedef blockingqueue<coroutine::pointer> co_queue;
+    typedef coroutine::func func;
+    typedef blockingqueue<coroutine::pointer> co_queue;
 
 public:
-	schedule();
-	~schedule();
+    schedule();
+    ~schedule();
 
-	void init(int thread_num);
+    void init(int thread_num);
 
-	coroutine::pointer new_coroutine(func fn);
+    coroutine::pointer new_coroutine(func fn);
 
-	void push_coroutine(int index, coroutine::pointer co);
+    void push_coroutine(int index, coroutine::pointer co);
 
-	coroutine::pointer pop_coroutine(int index);
+    coroutine::pointer pop_coroutine(int index);
 
-	std::size_t size() const;
-	bool empty() const;
-	int remove(coroutine::pointer co);
+    std::size_t size() const;
+    bool empty() const;
+    int remove(coroutine::pointer co);
 
 private:
-	schedule& operator=(const schedule& other) = delete;
-	schedule(const schedule& other) = delete;
+    schedule& operator=(const schedule& other) = delete;
+    schedule(const schedule& other) = delete;
 
 private:
-	mutable std::mutex mutex_;
-	std::vector<co_queue> coroutine_vec_;
-	std::atomic_size_t size_; // atmoic operation
-	int max_id_;
+    mutable std::mutex mutex_;
+    std::vector<co_queue> coroutine_vec_;
+    std::atomic_size_t size_; // atmoic operation
+    int max_id_;
 };
 
 } // namespace lightswing

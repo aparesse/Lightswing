@@ -34,24 +34,24 @@ namespace lightswing
 class comutex
 {
 public:
-	comutex();
-	void lock();
-	void unlock();
+    comutex();
+    void lock();
+    void unlock();
 
 private:
-	void lock_free_aux();
-	void lock_aux();
+    void lock_free_aux();
+    void lock_aux();
 
 private:
-	std::atomic_int contenders_;
-	std::mutex mutex_;
+    std::atomic_int contenders_;
+    std::mutex mutex_;
 
 };
 
 //TODO: the best way that is checking in compile phrase
 inline comutex::comutex() :
-	contenders_(0),
-	mutex_()
+    contenders_(0),
+    mutex_()
 {
 
 }
@@ -60,63 +60,63 @@ inline comutex::comutex() :
 
 inline void comutex::lock()
 {
-	runtime* pruntime = runtime::instance();
-	if (pruntime->max_procs() > 1)
-	{
-		lock_aux();
-	}
-	else
-	{
-		lock_free_aux();
-	}
+    runtime* pruntime = runtime::instance();
+    if (pruntime->max_procs() > 1)
+    {
+        lock_aux();
+    }
+    else
+    {
+        lock_free_aux();
+    }
 }
 
 inline void comutex::unlock()
 {
-	--contenders_;
+    --contenders_;
 }
 
 inline void comutex::lock_aux()
 {
-	while (true)
-	{
-		while (contenders_ > 0)
-			coroutine_yield();
+    while (true)
+    {
+        while (contenders_ > 0)
+            coroutine_yield();
 
-		if (mutex_.try_lock())
-		  break;
-	}
-	++contenders_;
-	mutex_.unlock();
+        if (mutex_.try_lock())
+          break;
+    }
+    ++contenders_;
+    mutex_.unlock();
 }
 
 inline void comutex::lock_free_aux()
 {
-	while (contenders_ > 0)
-	  coroutine_yield();
-	++contenders_;
+    while (contenders_ > 0)
+      coroutine_yield();
+    ++contenders_;
 }
 
 class mutexguard
 {
 public:
-	mutexguard(comutex& comtx);
-	~mutexguard();
+    mutexguard(comutex& comtx);
+    ~mutexguard();
 
 private:
-	comutex& comutex_;
+    comutex& comutex_;
 
 };
 
 inline mutexguard::mutexguard(comutex& comtx) :
-	comutex_(comtx)
+    comutex_(comtx)
 {
-	comutex_.lock();
+    comutex_.lock();
 }
 
 inline mutexguard::~mutexguard()
 {
-	comutex_.unlock();
+    comutex_.unlock();
 }
 
 } // namespace lightswing

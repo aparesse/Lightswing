@@ -31,15 +31,15 @@ namespace lightswing
 {
 class cache
 {
-	typedef std::vector<char*> memorylist;
+    typedef std::vector<char*> memorylist;
 public:
-	cache();
-	void deallocate(void* p, std::size_t size);
-	void* allocate(std::size_t size);
-	void expansion(const memorylist& ptrs, std::size_t level);
+    cache();
+    void deallocate(void* p, std::size_t size);
+    void* allocate(std::size_t size);
+    void expansion(const memorylist& ptrs, std::size_t level);
 
 private:
-	std::vector<memorylist> freelists_;
+    std::vector<memorylist> freelists_;
 };
 
 }

@@ -33,56 +33,56 @@ const std::size_t TCP_DEFAULT_ADDR_PORT = std::string::npos;
 class tcpaddr
 {
 public:
-	explicit tcpaddr(const std::string& ip, std::size_t port = TCP_DEFAULT_ADDR_PORT) :
-		ip_(ip),
-		port_(port)
-	{
-	}
+    explicit tcpaddr(const std::string& ip, std::size_t port = TCP_DEFAULT_ADDR_PORT) :
+        ip_(ip),
+        port_(port)
+    {
+    }
 
-	tcpaddr() :
-		ip_(),
-		port_(TCP_DEFAULT_ADDR_PORT)
-	{
-	}
+    tcpaddr() :
+        ip_(),
+        port_(TCP_DEFAULT_ADDR_PORT)
+    {
+    }
 
-	bool operator<(const tcpaddr& other) const;
+    bool operator<(const tcpaddr& other) const;
 
-	bool operator>(const tcpaddr& other) const;
+    bool operator>(const tcpaddr& other) const;
 
-	bool operator==(const tcpaddr& other) const;
+    bool operator==(const tcpaddr& other) const;
 
 
 public:
-	std::string ip_;
-	std::size_t port_;
+    std::string ip_;
+    std::size_t port_;
 };
 
 inline bool tcpaddr::operator<(const tcpaddr& other) const
 {
-	if (ip_ > other.ip_)
-	{
-		return true;
-	}
+    if (ip_ > other.ip_)
+    {
+        return true;
+    }
 
-	if (port_ > other.port_)
-	{
-		return true;
-	}
-	return false;
+    if (port_ > other.port_)
+    {
+        return true;
+    }
+    return false;
 }
 
 inline bool tcpaddr::operator>(const tcpaddr& other) const
 {
-	if (other == *this)
-	{
-		return false;
-	}
-	return !operator<(other);
+    if (other == *this)
+    {
+        return false;
+    }
+    return !operator<(other);
 }
 
 inline bool tcpaddr::operator==(const tcpaddr& other) const
 {
-	return other.ip_ == ip_ && other.port_ == port_;
+    return other.ip_ == ip_ && other.port_ == port_;
 }
 
 } // namespace lightswing

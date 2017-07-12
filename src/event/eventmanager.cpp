@@ -29,10 +29,10 @@
 namespace lightswing
 {
 eventmanager::eventmanager() :
-	mutex_(), // std::mutex default construct called
-	loop_(), // event_loop default construct called
-	events_(), // empty map
-	loop_interval_(kDEFUALT_INTERVAL)
+    mutex_(), // std::mutex default construct called
+    loop_(), // event_loop default construct called
+    events_(), // empty map
+    loop_interval_(kDEFUALT_INTERVAL)
 {
 
 }
@@ -44,121 +44,121 @@ eventmanager::~eventmanager()
 
 void eventmanager::loop()
 {
-	loop_.loop(loop_interval_);
+    loop_.loop(loop_interval_);
 }
 
 eventloop* eventmanager::the_eventloop()
 {
-	return &loop_;
+    return &loop_;
 }
 
 void eventmanager::set_interval(std::size_t interval)
 {
-	loop_interval_ = interval;
+    loop_interval_ = interval;
 }
 
 void eventmanager::add_epoll_event(epollevent* event)
 {
-	loop_.add_event(event);
+    loop_.add_event(event);
 }
 
 void eventmanager::delete_epoll_event(epollevent* event)
 {
-	loop_.delete_event(event);
+    loop_.delete_event(event);
 }
 
 int __read_one_byte(int fd)
 {
-	char byte;
-	int n = ::read(fd, &byte, 1);
-	// TODO
-	if (n < 0)
-	  LOG_DEBUG << "read error n < 0";
+    char byte;
+    int n = ::read(fd, &byte, 1);
+    // TODO
+    if (n < 0)
+      LOG_DEBUG << "read error n < 0";
 
-	if (n == 0)
-	  LOG_DEBUG << "read close n == 0";
+    if (n == 0)
+      LOG_DEBUG << "read close n == 0";
 
-	return n;
+    return n;
 }
 
 int __send_one_byte(int fd)
 {
-	int n = ::write(fd, "", 1);
-	// TODO
-	if (n < 0)
-	  LOG_DEBUG << "write error n < 0";
-	
-	if (n == 0)
-	  LOG_DEBUG << "write close n == 0";
+    int n = ::write(fd, "", 1);
+    // TODO
+    if (n < 0)
+      LOG_DEBUG << "write error n < 0";
+    
+    if (n == 0)
+      LOG_DEBUG << "write close n == 0";
 
-	return n;
+    return n;
 }
 
 void eventmanager::register_event(const std::string& name, func fn)
 {
-	std::lock_guard<std::mutex> lock(mutex_);
-	int pipefd[2];
-	int err = pipe(pipefd);
-	if (err < 0)
-	{
-		LOG_DEBUG << "pipe error";
-		return;
-	}
-	set_non_blocking(pipefd[kREAD_FD]);
-	set_non_blocking(pipefd[kWRITE_FD]);
+    std::lock_guard<std::mutex> lock(mutex_);
+    int pipefd[2];
+    int err = pipe(pipefd);
+    if (err < 0)
+    {
+        LOG_DEBUG << "pipe error";
+        return;
+    }
+    set_non_blocking(pipefd[kREAD_FD]);
+    set_non_blocking(pipefd[kWRITE_FD]);
 
-	eventfd::pointer ev_fd = eventfd::create(pipefd[kREAD_FD],
-				pipefd[kWRITE_FD],
-				&loop_);
-	ev_fd->event_.set_read_callback([this, fn](int fd)
-				                    {
-										if (__read_one_byte(fd) < 1)
-										{
-											return;
-										}
-										go(fn);
-									});
+    eventfd::pointer ev_fd = eventfd::create(pipefd[kREAD_FD],
+                pipefd[kWRITE_FD],
+                &loop_);
+    ev_fd->event_.set_read_callback([this, fn](int fd)
+                                    {
+                                        if (__read_one_byte(fd) < 1)
+                                        {
+                                            return;
+                                        }
+                                        go(fn);
+                                    });
 
-	ev_fd->event_.set_close_callback([this](int fd) { handle_close(fd); });
-	ev_fd->event_.set_error_callback([this](int fd) { handle_error(fd); });
-	events_[name] = ev_fd;
+    ev_fd->event_.set_close_callback([this](int fd) { handle_close(fd); });
+    ev_fd->event_.set_error_callback([this](int fd) { handle_error(fd); });
+    events_[name] = ev_fd;
 }
 
 void eventmanager::unregister_event(const std::string& name)
 {
-	std::lock_guard<std::mutex> lock(mutex_);
-	auto iter = events_.find(name);
-	if (iter == events_.end())
-	  LOG_DEBUG << "unregister_event failed";
-	events_.erase(iter);
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = events_.find(name);
+    if (iter == events_.end())
+      LOG_DEBUG << "unregister_event failed";
+    events_.erase(iter);
 }
 
 void eventmanager::emit_event(const std::string& name) const
 {
-	std::lock_guard<std::mutex> lock(mutex_);
-	auto iter = events_.find(name);
-	if (iter == events_.end())
-	{
-		LOG_DEBUG << "unregistered event";
-		return;
-	}
-	eventfd::pointer event = iter->second;
-	int n = __send_one_byte(event->write_fd_);
-	if (n < 1)
-	  LOG_DEBUG << "send event failed";
-	return;
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = events_.find(name);
+    if (iter == events_.end())
+    {
+        LOG_DEBUG << "unregistered event";
+        return;
+    }
+    eventfd::pointer event = iter->second;
+    int n = __send_one_byte(event->write_fd_);
+    if (n < 1)
+      LOG_DEBUG << "send event failed";
+    return;
 }
 
 void eventmanager::handle_close(int fd)
 {
-	// TODO
-	LOG_DEBUG << "handle_error fd: " << fd;
+    // TODO
+    LOG_DEBUG << "handle_error fd: " << fd;
 }
 
 void eventmanager::handle_error(int fd)
 {
-	// TODO
-	LOG_DEBUG << "handle_error fd: " << fd;
+    // TODO
+    LOG_DEBUG << "handle_error fd: " << fd;
 }
 
 } // namespace lightswing

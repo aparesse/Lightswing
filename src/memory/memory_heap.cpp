@@ -25,8 +25,8 @@
 namespace lightswing
 {
 memoryheap::memoryheap() :
-	mutex_(),
-	alloc_size_(kDEFAULT_SIZE)
+    mutex_(),
+    alloc_size_(kDEFAULT_SIZE)
 {
 
 }
@@ -38,17 +38,17 @@ memoryheap::~memoryheap()
 
 void* memoryheap::allocate(std::size_t size)
 {
-	return malloc(size);
+    return malloc(size);
 }
 
 void memoryheap::deallocate(void* p, std::size_t size)
 {
-	free(p);
+    free(p);
 }
 
 memoryheap* memoryheap::instance()
 {
-	return singleton<memoryheap>::instance();
+    return singleton<memoryheap>::instance();
 }
 
 }

@@ -26,27 +26,27 @@ using namespace lightswing;
 
 void example_mutex()
 {
-	static comutex mutex;
-	static int g_int = 0;
-	LOG_INFO << g_int;
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 11;
-			LOG_INFO << "static var is modified to 11";
-	   });
-	go([] ()
-	   {
-			mutexguard lock(mutex);
-			g_int = 22;
-			LOG_INFO << "static var is modified to 22";
-	   });
+    static comutex mutex;
+    static int g_int = 0;
+    LOG_INFO << g_int;
+    go([] ()
+       {
+            mutexguard lock(mutex);
+            g_int = 11;
+            LOG_INFO << "static var is modified to 11";
+       });
+    go([] ()
+       {
+            mutexguard lock(mutex);
+            g_int = 22;
+            LOG_INFO << "static var is modified to 22";
+       });
 
 }
 
 void mutex_main()
 {
-	runtime* t_runtime = runtime::instance();
-	t_runtime->set_max_procs(3);
-	t_runtime->start(example_mutex);
+    runtime* t_runtime = runtime::instance();
+    t_runtime->set_max_procs(3);
+    t_runtime->start(example_mutex);
 }

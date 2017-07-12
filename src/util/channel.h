@@ -34,31 +34,31 @@ template<class T>
 class channel
 {
 public:
-	typedef T valuetype;
-	typedef blockingqueue<valuetype> queuetype;
-	typedef std::shared_ptr<queuetype> queuepointer;
-	typedef std::shared_ptr<channel> pointer;
+    typedef T valuetype;
+    typedef blockingqueue<valuetype> queuetype;
+    typedef std::shared_ptr<queuetype> queuepointer;
+    typedef std::shared_ptr<channel> pointer;
 
 public:
-	channel();
-	channel(std::size_t size);
+    channel();
+    channel(std::size_t size);
 
-	int send(const valuetype& value);
-	valuetype recv();
-	channel<valuetype> brother();
-	std::size_t send_size() const;
-	std::size_t recv_size() const;
-
-private:
-	struct __privateconstruct
-	{
-	};
-
-	channel(__privateconstruct constructor);
+    int send(const valuetype& value);
+    valuetype recv();
+    channel<valuetype> brother();
+    std::size_t send_size() const;
+    std::size_t recv_size() const;
 
 private:
-	queuepointer send_queue_;
-	queuepointer recv_queue_;
+    struct __privateconstruct
+    {
+    };
+
+    channel(__privateconstruct constructor);
+
+private:
+    queuepointer send_queue_;
+    queuepointer recv_queue_;
 
 };
 
@@ -67,61 +67,61 @@ const int __BROTHER = 0;
 template<class T>
 inline channel<T> make_channel()
 {
-	return channel<T>();
+    return channel<T>();
 }
 
 template<class T>
 inline channel<T>::channel() :
-	send_queue_(std::make_shared<queuetype>()),
-	recv_queue_(std::make_shared<queuetype>())
+    send_queue_(std::make_shared<queuetype>()),
+    recv_queue_(std::make_shared<queuetype>())
 {
 }
 
 template<class T>
 inline channel<T>::channel(std::size_t size) :
-	send_queue_(std::make_shared<queuetype>(size)),
-	recv_queue_(std::make_shared<queuetype>(size))
+    send_queue_(std::make_shared<queuetype>(size)),
+    recv_queue_(std::make_shared<queuetype>(size))
 {
 }
 
 template<class T>
 inline int channel<T>::send(const valuetype& value)
 {
-	return send_queue_->push(value);
+    return send_queue_->push(value);
 }
 
 template<class T>
 inline T channel<T>::recv()
 {
-	return recv_queue_->pop();
+    return recv_queue_->pop();
 }
 
 template<class T>
 inline std::size_t channel<T>::send_size() const
 {
-	return send_queue_->size();
+    return send_queue_->size();
 }
 
 template<class T>
 inline std::size_t channel<T>::recv_size() const
 {
-	return recv_queue_->size();
+    return recv_queue_->size();
 }
 
 template<class T>
 inline channel<T> channel<T>::brother()
 {
-	// call overloaded private constructor
-	channel<T> brother_channel{__privateconstruct()};
-	brother_channel.recv_queue_ = send_queue_;
-	brother_channel.send_queue_ = recv_queue_;
-	return brother_channel;
+    // call overloaded private constructor
+    channel<T> brother_channel{__privateconstruct()};
+    brother_channel.recv_queue_ = send_queue_;
+    brother_channel.send_queue_ = recv_queue_;
+    return brother_channel;
 }
 
 template<class T>
 inline channel<T>::channel(__privateconstruct constructor) :
-	send_queue_(nullptr),
-	recv_queue_(nullptr)
+    send_queue_(nullptr),
+    recv_queue_(nullptr)
 {
 
 }

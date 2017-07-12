@@ -36,63 +36,63 @@ template<class T>
 class blockingqueue
 {
 public:
-	blockingqueue(std::size_t size) :
-		queue_(),
-		mutex_(),
-		cond_(),
-		max_size_(size)
-	{
-	}
+    blockingqueue(std::size_t size) :
+        queue_(),
+        mutex_(),
+        cond_(),
+        max_size_(size)
+    {
+    }
 
-	blockingqueue() :
-		queue_(),
-		mutex_(),
-		cond_(),
-		max_size_(kDEFAULT_BLKQUEUE_SIZE)
-	{
-	}
+    blockingqueue() :
+        queue_(),
+        mutex_(),
+        cond_(),
+        max_size_(kDEFAULT_BLKQUEUE_SIZE)
+    {
+    }
 
-	int push(T elem)
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		if (queue_.size() >= max_size_)
-		{
-			return -1;
-		}
-		queue_.push(std::move(elem));
-		cond_.notify_one();
-		return 0;
-	}
+    int push(T elem)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (queue_.size() >= max_size_)
+        {
+            return -1;
+        }
+        queue_.push(std::move(elem));
+        cond_.notify_one();
+        return 0;
+    }
 
-	bool empty() const
-	{
-		std::lock_guard<std::mutex> lock(mutex_);
-		return queue_.empty();
-	}
+    bool empty() const
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return queue_.empty();
+    }
 
-	T pop()
-	{
-		std::unique_lock<std::mutex> lock(mutex_);
-		cond_.wait(lock, [this] ()
-				    	 { 
-							return !queue_.empty();
-						 });
-		T elem = std::move(queue_.front());
-		queue_.pop();
-		return elem;
-	}
-
-private:
-	blockingqueue(const blockingqueue& other) = delete;
-	blockingqueue operator=(const blockingqueue& other) = delete;
-	// delete move constructor
-	blockingqueue(blockingqueue&& other) = delete;
+    T pop()
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        cond_.wait(lock, [this] ()
+                         { 
+                            return !queue_.empty();
+                         });
+        T elem = std::move(queue_.front());
+        queue_.pop();
+        return elem;
+    }
 
 private:
-	std::queue<T> queue_;
-	mutable std::mutex mutex_;
-	std::condition_variable cond_;
-	std::size_t max_size_;
+    blockingqueue(const blockingqueue& other) = delete;
+    blockingqueue operator=(const blockingqueue& other) = delete;
+    // delete move constructor
+    blockingqueue(blockingqueue&& other) = delete;
+
+private:
+    std::queue<T> queue_;
+    mutable std::mutex mutex_;
+    std::condition_variable cond_;
+    std::size_t max_size_;
 };
 }
 #endif // BLOCKING_QUEUE_H

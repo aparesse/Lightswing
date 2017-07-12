@@ -31,21 +31,21 @@ namespace lightswing
 class __integer
 {
 public:
-	__integer(int value) : value_(value) {}
+    __integer(int value) : value_(value) {}
 
-	std::string to_string() const 
-	{
-		std::stringstream ss;
-		ss << value_;
-		return ss.str();
-	}
+    std::string to_string() const 
+    {
+        std::stringstream ss;
+        ss << value_;
+        return ss.str();
+    }
 
-	bool operator==(int value)
-	{
-		return value_ = value;
-	}
+    bool operator==(int value)
+    {
+        return value_ = value;
+    }
 private:
-	int value_;
+    int value_;
 
 };
 

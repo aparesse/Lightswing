@@ -29,7 +29,7 @@
 namespace lightswing
 {
 schedule::schedule() :
-	max_id_(0)
+    max_id_(0)
 {
 
 }
@@ -41,52 +41,52 @@ schedule::~schedule()
 
 void schedule::init(int thread_num)
 {
-	coroutine_vec_ = std::vector<co_queue>(thread_num);
+    coroutine_vec_ = std::vector<co_queue>(thread_num);
 }
 
 coroutine::pointer schedule::new_coroutine(func fn)
 {
-	std::lock_guard<std::mutex> lock(mutex_);
-	coroutine::pointer co = coroutine::create();
-	assert(co);
-	// schedule is coroutine's friend class
-	co->fn_ = std::move(fn);
-	co->id_ = max_id_++;
-	co->status_ = coroutine::eREADY;
-	std::size_t index = co->id_ % coroutine_vec_.size();
-	co_queue& q = coroutine_vec_[index];
-	q.push(co);
-	++size_;
-	return co;
+    std::lock_guard<std::mutex> lock(mutex_);
+    coroutine::pointer co = coroutine::create();
+    assert(co);
+    // schedule is coroutine's friend class
+    co->fn_ = std::move(fn);
+    co->id_ = max_id_++;
+    co->status_ = coroutine::eREADY;
+    std::size_t index = co->id_ % coroutine_vec_.size();
+    co_queue& q = coroutine_vec_[index];
+    q.push(co);
+    ++size_;
+    return co;
 }
 
 void schedule::push_coroutine(int index, coroutine::pointer co)
 {
-	co_queue& q = coroutine_vec_[index];
-	q.push(co);
+    co_queue& q = coroutine_vec_[index];
+    q.push(co);
 }
 
 coroutine::pointer schedule::pop_coroutine(int index)
 {
-	co_queue& q = coroutine_vec_[index];
-	return q.pop();
+    co_queue& q = coroutine_vec_[index];
+    return q.pop();
 }
 
 std::size_t schedule::size() const
 {
-	return size_;
+    return size_;
 }
 
 bool schedule::empty() const
 {
-	return size_ == 0;
+    return size_ == 0;
 }
 
 // TODO
 int schedule::remove(coroutine::pointer co)
 {
-	assert(co);
-	--size_;
-	return 0;
+    assert(co);
+    --size_;
+    return 0;
 }
 } // namespace lightswing

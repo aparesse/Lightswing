@@ -33,27 +33,27 @@ namespace lightswing
 {
 class memorypool
 {
-	typedef char* pointer;
-	typedef std::list<pointer> pointerlist;
+    typedef char* pointer;
+    typedef std::list<pointer> pointerlist;
 public:
-	static memorypool* instance();
+    static memorypool* instance();
 
 public:
-	memorypool();
-	void init(std::size_t size);
-	void* allocate(std::size_t size);
-	void deallocate(void* addr, std::size_t len);
+    memorypool();
+    void init(std::size_t size);
+    void* allocate(std::size_t size);
+    void deallocate(void* addr, std::size_t len);
 
 private:
-	void* ajust(std::size_t n);
-	std::size_t free_size() const;
+    void* ajust(std::size_t n);
+    std::size_t free_size() const;
 
-	memorypool& operator=(const memorypool&) = delete;
-	memorypool(const memorypool&) = delete;
+    memorypool& operator=(const memorypool&) = delete;
+    memorypool(const memorypool&) = delete;
 
 private:
-	std::vector<central> centrals_;
-	std::vector<cache> caches_;
+    std::vector<central> centrals_;
+    std::vector<cache> caches_;
 };
 
 }

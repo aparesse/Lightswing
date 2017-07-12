@@ -26,33 +26,33 @@ using namespace lightswing;
 
 void emit_func(int times)
 {
-	for (int i = 0; i < times; ++i)
-	{
-		LOG_INFO << "emit a happy event signal";
-		coroutine_emit_event("happy");
-		coroutine_sleep(3);
-	}
+    for (int i = 0; i < times; ++i)
+    {
+        LOG_INFO << "emit a happy event signal";
+        coroutine_emit_event("happy");
+        coroutine_sleep(3);
+    }
 }
 
 void example_event()
 {
-	// register signal and handler-function
-	coroutine_on_event("happy", [] ()
-				                {
-									LOG_INFO << "recv a happy signal";
-								});
+    // register signal and handler-function
+    coroutine_on_event("happy", [] ()
+                                {
+                                    LOG_INFO << "recv a happy signal";
+                                });
 
-	// new a go-coroutine
-	go(emit_func, 3);
+    // new a go-coroutine
+    go(emit_func, 3);
 }
 
 int event_main()
 {
-	runtime* t_runtime = runtime::instance();
+    runtime* t_runtime = runtime::instance();
 
-	t_runtime->set_max_procs(3);
+    t_runtime->set_max_procs(3);
 
-	t_runtime->start(example_event);
-	return 0;
+    t_runtime->start(example_event);
+    return 0;
 }
 

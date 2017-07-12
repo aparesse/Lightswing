@@ -31,36 +31,36 @@ namespace test
 class debugprinter
 {
 public:
-	debugprinter() : ss_() {}
-	~debugprinter() { std::cout << ss_.str() << std::endl; }
-	std::stringstream& stream() { return ss_; }
+    debugprinter() : ss_() {}
+    ~debugprinter() { std::cout << ss_.str() << std::endl; }
+    std::stringstream& stream() { return ss_; }
 private:
-	std::stringstream ss_;
+    std::stringstream ss_;
 };
 
 #define DEBUG_INFO test::debugprinter().stream() << "[DEBUG_INFO]"
 
-#define PRINT_RESULT(x)											 \
-do																 \
-{																 \
-	if (x)														 \
-	{															 \
-		std::cout << " [ok] ";									 \
-	}															 \
-	else														 \
-	{															 \
-		std::cout << " [failed] ";								 \
-	}															 \
-}																 \
-while (0)														 
+#define PRINT_RESULT(x)                                          \
+do                                                               \
+{                                                                \
+    if (x)                                                       \
+    {                                                            \
+        std::cout << " [ok] ";                                   \
+    }                                                            \
+    else                                                         \
+    {                                                            \
+        std::cout << " [failed] ";                               \
+    }                                                            \
+}                                                                \
+while (0)                                                        
 
 #define EXIT_IF_FALSE(x)                                         \
 do                                                               \
 {                                                                \
-	if (!(x))                                                    \
-	{                                                            \
-		exit(0);                                                 \
-	}                                                            \
+    if (!(x))                                                    \
+    {                                                            \
+        exit(0);                                                 \
+    }                                                            \
 }                                                                \
 while (0)                                                        
 
@@ -69,56 +69,56 @@ while (0)
 #define PRINT_INFO()                                             \
 do                                                               \
 {                                                                \
-	std::cout << "In "                                           \
-			  << __FILE__                                        \
-			  << ", "                                            \
-			  << __func__                                        \
-			  << "("                                             \
-			  << __LINE__                                        \
-			  << "): ";                                          \
+    std::cout << "In "                                           \
+              << __FILE__                                        \
+              << ", "                                            \
+              << __func__                                        \
+              << "("                                             \
+              << __LINE__                                        \
+              << "): ";                                          \
 }                                                                \
 while (0)                                                        
 
 #define EXCEPT_TRUE(x)                                           \
 do                                                               \
 {                                                                \
-	PRINT_RESULT(!(x));                                          \
-	PRINT_INFO();                                                \
-	std::cout << "statement is '" << STR(x) << "'";              \
-	std::cout << ", except true" << std::endl;                  \
-	EXIT_IF_FALSE(!(x));                                         \
+    PRINT_RESULT(!(x));                                          \
+    PRINT_INFO();                                                \
+    std::cout << "statement is '" << STR(x) << "'";              \
+    std::cout << ", except true" << std::endl;                  \
+    EXIT_IF_FALSE(!(x));                                         \
 }                                                                \
 while (0)                                                        
 
 #define EXCEPT_FALSE(x)                                          \
 do                                                               \
 {                                                                \
-	PRINT_RESULT(!(x));                                          \
-	PRINT_INFO();                                                \
-	std::cout << "statement is '" << STR(x) << "'";              \
-	std::cout << ", except false" << std::endl;                  \
+    PRINT_RESULT(!(x));                                          \
+    PRINT_INFO();                                                \
+    std::cout << "statement is '" << STR(x) << "'";              \
+    std::cout << ", except false" << std::endl;                  \
 }                                                                \
 while (0)
 
 #define EXCEPT_EQ(a, b)                                          \
 do                                                               \
 {                                                                \
-	PRINT_RESULT((a) == (b));                                    \
-	PRINT_INFO();                                                \
-	std::cout << "except '" << STR(a) << " == " << STR(b);       \
-	std::cout << "'" << std::endl;                               \
-	EXIT_IF_FALSE((a) == (b));                                   \
+    PRINT_RESULT((a) == (b));                                    \
+    PRINT_INFO();                                                \
+    std::cout << "except '" << STR(a) << " == " << STR(b);       \
+    std::cout << "'" << std::endl;                               \
+    EXIT_IF_FALSE((a) == (b));                                   \
 }                                                                \
 while (0)
 
 #define EXCEPT_NE(a, b)                                          \
 do                                                               \
 {                                                                \
-	PRINT_RESULT((a) != (b));                                    \
-	PRINT_INFO();                                                \
-	std::cout << "except '" << STR(a) << " != " << STR(b);       \
-	std::cout << "'" << std::endl;                               \
-	EXIT_IF_FALSE((a) != (b));                                   \
+    PRINT_RESULT((a) != (b));                                    \
+    PRINT_INFO();                                                \
+    std::cout << "except '" << STR(a) << " != " << STR(b);       \
+    std::cout << "'" << std::endl;                               \
+    EXIT_IF_FALSE((a) != (b));                                   \
 }                                                                \
 while (0)
 

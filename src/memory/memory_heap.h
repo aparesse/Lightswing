@@ -32,19 +32,19 @@ namespace lightswing
 class memoryheap
 {
 public:
-	static const int kDEFAULT_SIZE = 1024;
+    static const int kDEFAULT_SIZE = 1024;
 
 public:
-	memoryheap();
-	~memoryheap();
+    memoryheap();
+    ~memoryheap();
 
-	static memoryheap* instance();
-	void* allocate(std::size_t size);
-	void deallocate(void* p, std::size_t size);
+    static memoryheap* instance();
+    void* allocate(std::size_t size);
+    void deallocate(void* p, std::size_t size);
 
 private:
-	std::mutex mutex_;
-	std::size_t alloc_size_;
+    std::mutex mutex_;
+    std::size_t alloc_size_;
 
 };
 

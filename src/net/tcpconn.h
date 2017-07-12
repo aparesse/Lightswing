@@ -37,37 +37,37 @@ namespace lightswing
 class tcpconn
 {
 public:
-	const static int kREAD_ABLE   = 1;
-	const static int kWRITE_ABLE  = 2;
-	const static int kERROR       = 4;
-	const static int kCLOSE       = 8;
+    const static int kREAD_ABLE   = 1;
+    const static int kWRITE_ABLE  = 2;
+    const static int kERROR       = 4;
+    const static int kCLOSE       = 8;
 
-	typedef std::shared_ptr<tcpconn> pointer;
+    typedef std::shared_ptr<tcpconn> pointer;
 
 public:
-	tcpconn(eventloop* loop, int fd);
-	~tcpconn();
+    tcpconn(eventloop* loop, int fd);
+    ~tcpconn();
 
-	static pointer create(eventloop* loop, int fd)
-	{
-		return std::make_shared<tcpconn>(loop, fd);
-	}
+    static pointer create(eventloop* loop, int fd)
+    {
+        return std::make_shared<tcpconn>(loop, fd);
+    }
 
-	tcpaddr& peer();
-	// use std::move()
-	void set_peer_addr(tcpaddr addr);
-	int fd() const;
-	void send(const slice& pslice);
-	void send(const char* buf, std::size_t len);
-	void send(const std::string& msg);
+    tcpaddr& peer();
+    // use std::move()
+    void set_peer_addr(tcpaddr addr);
+    int fd() const;
+    void send(const slice& pslice);
+    void send(const char* buf, std::size_t len);
+    void send(const std::string& msg);
 
-	std::pair<errcode, slice> recv();
+    std::pair<errcode, slice> recv();
 
 private:
-	epollevent::pointer ev_;
-	tcpaddr peer_;
-	std::vector<char> buf_;
-	std::atomic<int> status_;
+    epollevent::pointer ev_;
+    tcpaddr peer_;
+    std::vector<char> buf_;
+    std::atomic<int> status_;
 };
 
 } // namespace lightswing
